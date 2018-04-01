@@ -1,5 +1,25 @@
-
-#include <cstdint>
+/**
+ * Copyright (C) Paul Wortmann, PhysHex Games, www.physhexgames.com
+ * This file is part of "Librmg"
+ *
+ * "Librmg" is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 only.
+ *
+ * "Librmg" is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with "Librmg" If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author  Paul Wortmann
+ * @email   physhex@gmail.com
+ * @website www.physhexgames.com
+ * @license GPL V2
+ * @date 2018-04-01
+ */
 
 #ifndef __LIBRMG_HPP__
 #define __LIBRMG_HPP__
@@ -19,6 +39,7 @@
 #define RMG_PATH_SL 0 // Straight Line
 #define RMG_PATH_ND 1 // Ninety Degree angle lines
 #define RMG_PATH_DW 2 // Drunken Walk
+#define RMG_PATH_CC 3 // Curved Corner
 
 #define RMG_GEN_C1 0 // Cave 1
 
@@ -29,7 +50,7 @@ namespace rmg
     {
         bool     p = false; // processed flag
         uint16_t d = RMG_FLOOR; // data
-        uint16_t r = 0; // room
+        uint16_t r = 0; // room number
         uint32_t x = 0;
         uint32_t y = 0;
     };
@@ -47,10 +68,10 @@ namespace rmg
         uint16_t y = 0;
         uint16_t w = 0;
         uint16_t h = 0;
-        uint16_t exitN = 0; // 0 for none, else connecting room ID
-        uint16_t exitS = 0;
-        uint16_t exitE = 0;
-        uint16_t exitW = 0;
+        int16_t exitN = -1; // -1 for none, else connecting room ID
+        int16_t exitS = -1;
+        int16_t exitE = -1;
+        int16_t exitW = -1;
     };
 
     struct sMap
@@ -85,6 +106,7 @@ namespace rmg
     void genCircle(sMap &_map);
     void mapPerimeterWalls(sMap &_map);
     uint32_t mapGetFloorArea(sMap &_map);
+    void mapRemoveAnomalies(sMap &_map);
 
     // --- librmg_C1.cpp ---
     void genC1(sMap &_map);
@@ -94,8 +116,10 @@ namespace rmg
     void mapConnectRooms_SL(sMap &_map, uint16_t _r1, uint16_t _r2);
     void mapConnectRooms_ND(sMap &_map, uint16_t _r1, uint16_t _r2);
     void mapConnectRooms_DW(sMap &_map, uint16_t _r1, uint16_t _r2);
+    void mapConnectRooms_CC(sMap &_map, uint16_t _r1, uint16_t _r2);
 
 
 } // namespace rmg
 
 #endif // __LIBRMG_HPP__
+
