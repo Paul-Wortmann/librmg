@@ -37,10 +37,10 @@ namespace rmg
                     switch (_map.tile[(i * _map.w) + j].d)
                     {
                         case RMG_WALL:
-                            std::cout << ".";
+                            std::cout << " ";
                         break;
                         case RMG_PATH:
-                            std::cout << "P";
+                            std::cout << ".";
                         break;
                         case RMG_DOOR:
                             std::cout << "D";
@@ -63,7 +63,7 @@ namespace rmg
                 }
                 std::cout << std::endl;
             }
-            uint16_t roomID = 3;
+            uint16_t roomID = 0;
             std::cout << "Map seed: " << _map.seed << std::endl;
             std::cout << "Room Count: " << _map.roomCount << std::endl;
             std::cout << "North: " << _map.room[roomID].exitN << std::endl;
@@ -74,6 +74,8 @@ namespace rmg
             std::cout << "posXMin: " << _map.room[roomID].posXMin << std::endl;
             std::cout << "posYMax: " << _map.room[roomID].posYMax << std::endl;
             std::cout << "posYMin: " << _map.room[roomID].posYMin << std::endl;
+            std::cout << "pos X: " << _map.room[roomID].x << std::endl;
+            std::cout << "pos Y: " << _map.room[roomID].y << std::endl;
         }
     }
 

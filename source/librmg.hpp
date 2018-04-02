@@ -41,6 +41,12 @@
 #define RMG_PATH_DW 2 // Drunken Walk
 #define RMG_PATH_CC 3 // Curved Corner
 
+#define RMG_NONE  0
+#define RMG_NORTH 1
+#define RMG_SOUTH 2
+#define RMG_EAST  3
+#define RMG_WEST  4
+
 #define RMG_GEN_C1 0 // Cave 1
 
 namespace rmg
@@ -91,6 +97,7 @@ namespace rmg
         uint16_t generationAlgorithm = RMG_GEN_C1;
         uint16_t connectivityAlgorithm = RMG_PATH_SL;
         uint16_t connectivityComplexity = 50; // percentage, rand % connect neighbors
+        uint16_t connectivityPadding = 1; // Tiles to pad on each side of generated paths, ie. path (width - 1 ) / 2
     };
 
     // --- librmg.cpp ---

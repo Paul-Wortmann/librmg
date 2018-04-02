@@ -86,7 +86,7 @@ namespace rmg
                         mapConnectRooms_SL(_map, i, _map.room[i].exitE);
                     if (_map.room[i].exitW > -1)
                         mapConnectRooms_SL(_map, i, _map.room[i].exitW);
-                    if (_map.room[i].exitN > -10)
+                    if (_map.room[i].exitN > -1)
                         mapConnectRooms_SL(_map, i, _map.room[i].exitN);
                     if (_map.room[i].exitS > -1)
                         mapConnectRooms_SL(_map, i, _map.room[i].exitS);
@@ -131,13 +131,69 @@ namespace rmg
     // Straight Line
     void mapConnectRooms_SL(sMap &_map, uint16_t _r1, uint16_t _r2)
     {
+        uint16_t direction = RMG_NONE;
+        if (_map.room[_r1].exitE == _r2)
+            direction = RMG_EAST;
+        if (_map.room[_r1].exitW == _r2)
+            direction = RMG_WEST;
+        if (_map.room[_r1].exitN == _r2)
+            direction = RMG_NORTH;
+        if (_map.room[_r1].exitS == _r2)
+            direction = RMG_SOUTH;
+        uint16_t psx = ((direction == RMG_EAST) || (direction == RMG_WEST)) ?  ((direction == RMG_EAST) ? _map.room[_r1].posXMin : _map.room[_r1].posXMax) : _map.room[_r1].x;
+        uint16_t psy = ((direction == RMG_NORTH) || (direction == RMG_SOUTH)) ?  ((direction == RMG_NORTH) ? _map.room[_r1].posYMin : _map.room[_r1].posYMax) : _map.room[_r1].y;
+        uint16_t pex = ((direction == RMG_EAST) || (direction == RMG_WEST)) ?  ((direction == RMG_WEST) ? _map.room[_r2].posXMin : _map.room[_r2].posXMax) : _map.room[_r2].x;
+        uint16_t pey = ((direction == RMG_NORTH) || (direction == RMG_SOUTH)) ?  ((direction == RMG_SOUTH) ? _map.room[_r2].posYMin : _map.room[_r2].posYMax) : _map.room[_r2].y;
+        std::cout << "X1: " << psx  << " Y1: " << psy << std::endl;
+        std::cout << "X2: " << pex  << " Y2: " << pey << std::endl;
+        if (direction == RMG_EAST)
+        {
+            while ((_map.tile[(psy * _map.w) + psx].d == RMG_WALL) && (psx < _map.room[_r1].posXMax))
+                psx++;
+            while ((_map.tile[(pey * _map.w) + pex].d == RMG_WALL) && (pex > _map.room[_r2].posXMin))
+                pex--;
+        }
+        if (direction == RMG_WEST)
+        {
+            while ((_map.tile[(psy * _map.w) + psx].d == RMG_WALL) && (psx > _map.room[_r1].posXMin))
+                psx--;
+            while ((_map.tile[(pey * _map.w) + pex].d == RMG_WALL) && (pex < _map.room[_r2].posXMax))
+                pex++;
+        }
+        if (direction == RMG_NORTH)
+        {
+            while ((_map.tile[(psy * _map.w) + psx].d == RMG_WALL) && (psy < _map.room[_r1].posYMax))
+                psy++;
+            while ((_map.tile[(pey * _map.w) + pex].d == RMG_WALL) && (pey > _map.room[_r2].posYMin))
+                pey--;
+        }
+        if (direction == RMG_SOUTH)
+        {
+            while ((_map.tile[(psy * _map.w) + psx].d == RMG_WALL) && (psy > _map.room[_r1].posYMin))
+                psy--;
+            while ((_map.tile[(pey * _map.w) + pex].d == RMG_WALL) && (pey < _map.room[_r2].posYMax))
+                pey++;
+        }
+        while ((psx != pex) || (psy != pey))
+        {
+            _map.tile[(psy * _map.w) + psx].d = (_map.tile[(psy * _map.w) + psx].d == RMG_WALL) ? RMG_PATH : _map.tile[(psy * _map.w) + psx].d;
+            psx = (psx == pex) ? psx : ((psx > pex) ? --psx : ++psx);
+            psy = (psy == pey) ? psy : ((psy > pey) ? --psy : ++psy);
+        }
 
     }
 
     // Straight Lines, 90 degree angle
     void mapConnectRooms_ND(sMap &_map, uint16_t _r1, uint16_t _r2)
     {
+        uint16_t r1x = (_map.room[_r1].x < _map.room[_r2].x) ? _map.room[_r1].x : _map.room[_r2].x;
+        uint16_t r2x = (_map.room[_r1].x > _map.room[_r2].x) ? _map.room[_r1].x : _map.room[_r2].x;
+        uint16_t r1y = (_map.room[_r1].y < _map.room[_r2].y) ? _map.room[_r1].y : _map.room[_r2].y;
+        uint16_t r2y = (_map.room[_r1].y > _map.room[_r2].y) ? _map.room[_r1].y : _map.room[_r2].y;
+        for (uint16_t i = r1x; i < r2x; i++)
+        {
 
+        }
     }
 
     // Drunken Walk
