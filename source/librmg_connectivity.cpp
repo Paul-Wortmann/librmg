@@ -28,97 +28,193 @@ namespace rmg
 
     void mapConnectRooms(sMap &_map)
     {
-        // find neighbors
-        uint32_t distanceN = _map.tileCount; // size larger that possible distance
-        uint32_t distanceE = _map.tileCount; // size larger that possible distance
-        uint32_t distanceW = _map.tileCount; // size larger that possible distance
-        uint32_t distanceS = _map.tileCount; // size larger that possible distance
         uint32_t distanceT = 0; // temp distance
+        uint32_t distanceN = _map.tileCount; // size larger than possible distance
+        uint32_t distanceE = _map.tileCount; // size larger than possible distance
+        uint32_t distanceW = _map.tileCount; // size larger than possible distance
+        uint32_t distanceS = _map.tileCount; // size larger than possible distance
+        // ray cast room finder
         for (uint16_t i = 0; i < _map.roomCount; i++)
         {
-            distanceN = _map.tileCount;
-            distanceE = _map.tileCount;
-            distanceW = _map.tileCount;
-            distanceS = _map.tileCount;
-            distanceT = 0;
-            for (uint16_t j = 0; j < _map.roomCount; j++)
+            //search horizontally
+            for (uint16_t j = _map.room[i].posYMin; j < _map.room[i].posYMax; j++)
             {
-                if (i != j)
+                // right / west
+                for (uint16_t k = _map.room[i].x; k < _map.w; k++)
                 {
-                    distanceT = abs(_map.room[j].x - _map.room[i].x) + abs(_map.room[j].y - _map.room[i].y);
-                    // left / east
-                    if ((_map.room[j].posXMax < _map.room[i].posXMin) && (distanceT < distanceE))
+                    uint16_t r = _map.tile[(j * _map.w) + k].r;
+                    if ((_map.tile[(j * _map.w) + k].d == RMG_FLOOR) && (r != i))
                     {
-                        distanceE = distanceT;
-                        _map.room[i].exitE = j;
-                        _map.room[j].exitW = i;
+                        distanceT = sqrt(((_map.room[r].x - _map.room[i].x) * (_map.room[r].x - _map.room[i].x)) + ((_map.room[r].y - _map.room[i].y) * (_map.room[r].y - _map.room[i].y)));
+                        if (distanceT < distanceW)
+                        {
+                            distanceW = distanceT;
+                            _map.room[i].exitW = r;
+                            _map.room[r].exitE = i;
+                        }
                     }
-                    // right / west
-                    if ((_map.room[j].posXMin > _map.room[i].posXMax) && (distanceT < distanceW))
+                }
+                // left / east
+                for (uint16_t k = _map.room[i].x; k > 0; k--)
+                {
+                    uint16_t r = _map.tile[(j * _map.w) + k].r;
+                    if ((_map.tile[(j * _map.w) + k].d == RMG_FLOOR) && (r != i))
                     {
-                        distanceW = distanceT;
-                        _map.room[i].exitW = j;
-                        _map.room[j].exitE = i;
+                        distanceT = sqrt(((_map.room[r].x - _map.room[i].x) * (_map.room[r].x - _map.room[i].x)) + ((_map.room[r].y - _map.room[i].y) * (_map.room[r].y - _map.room[i].y)));
+                        if (distanceT < distanceE)
+                        {
+                            distanceE = distanceT;
+                            _map.room[i].exitE = r;
+                            _map.room[r].exitW = i;
+                        }
                     }
-                    // up / north
-                    if ((_map.room[j].posYMax < _map.room[i].posYMin) && (distanceT < distanceN))
+                }
+            }
+            //search vertically
+            for (uint16_t k = _map.room[i].posXMin; k < _map.room[i].posXMax; k++)
+            {
+                // down / south
+                for (uint16_t j = _map.room[i].y; j < _map.h; j++)
+                {
+                    if ((_map.tile[(j * _map.w) + k].d == RMG_FLOOR) && (_map.tile[(j * _map.w) + k].r != i))
                     {
-                        distanceN = distanceT;
-                        _map.room[i].exitN = j;
-                        _map.room[j].exitS = i;
+                        distanceT = sqrt(((_map.room[j].x - _map.room[i].x) * (_map.room[j].x - _map.room[i].x)) + ((_map.room[j].y - _map.room[i].y) * (_map.room[j].y - _map.room[i].y)));
+                        if (distanceT < distanceS)
+                        {
+                            distanceS = distanceT;
+                            _map.room[i].exitS = _map.tile[(j * _map.w) + k].r;
+                            _map.room[_map.tile[(j * _map.w) + k].r].exitN = i;
+                        }
                     }
-                    // down / south
-                    if ((_map.room[j].posYMin > _map.room[i].posYMax) && (distanceT < distanceS))
+                }
+                // up / north
+                for (uint16_t j = _map.room[i].y; j > 0; j--)
+                {
+                    if ((_map.tile[(j * _map.w) + k].d == RMG_FLOOR) && (_map.tile[(j * _map.w) + k].r != i))
                     {
-                        distanceS = distanceT;
-                        _map.room[i].exitS = j;
-                        _map.room[j].exitN = i;
+                        distanceT = sqrt(((_map.room[j].x - _map.room[i].x) * (_map.room[j].x - _map.room[i].x)) + ((_map.room[j].y - _map.room[i].y) * (_map.room[j].y - _map.room[i].y)));
+                        if (distanceT < distanceN)
+                        {
+                            distanceN = distanceT;
+                            _map.room[i].exitN = _map.tile[(j * _map.w) + k].r;
+                            _map.room[_map.tile[(j * _map.w) + k].r].exitS = i;
+                        }
                     }
                 }
             }
         }
+        // remove multiple connections to same neighbor
+        for (uint16_t i = 0; i < _map.roomCount; i++)
+        {
+            for (uint16_t j = 0; j < _map.roomCount; j++)
+            {
+                uint16_t found = 0;
+                if (_map.room[i].exitE == j)
+                    found++;
+                if (_map.room[i].exitW == j)
+                {
+                    if (found == 1)
+                        _map.room[i].exitW = RMG_NOROOM;
+                    else
+                        found++;
+                }
+                if (_map.room[i].exitN == j)
+                {
+                    if (found == 1)
+                        _map.room[i].exitN = RMG_NOROOM;
+                    else
+                        found++;
+                }
+                if (_map.room[i].exitS == j)
+                {
+                    if (found == 1)
+                        _map.room[i].exitS = RMG_NOROOM;
+                    else
+                        found++;
+                }
+            }
+        }
+        // try to connect lonely rooms
+        for (uint16_t i = _map.roomCount; i > 0; i--)
+        {
+            int32_t deltaX = 0;
+            int32_t deltaY = 0;
+            if ((_map.room[i].exitE == RMG_NOROOM) && (_map.room[i].exitW == RMG_NOROOM) && (_map.room[i].exitN == RMG_NOROOM) && (_map.room[i].exitS == RMG_NOROOM))
+            {
+                std::cout << "Lonely room detected!" << std::endl;
+                deltaX = _map.room[i].x - _map.room[i-1].x;
+                deltaY = _map.room[i].y - _map.room[i-1].y;
+                if (abs(deltaX) < abs(deltaY))
+                {
+                    if (deltaX > 0)
+                    {
+                        _map.room[i].exitE = i-1;
+                        _map.room[i-1].exitW = i;
+                    }
+                    else
+                    {
+                        _map.room[i].exitW = i-1;
+                        _map.room[i-1].exitE = i;
+                    }
+                }
+                else
+                {
+                    if (deltaY > 0)
+                    {
+                        _map.room[i].exitN = i-1;
+                        _map.room[i-1].exitS = i;
+                    }
+                    else
+                    {
+                        _map.room[i].exitS = i-1;
+                        _map.room[i-1].exitN = i;
+                    }
+                }
+            }
+        }
+        // apply room inter-connections
         for (uint16_t i = 0; i < _map.roomCount; i++)
         {
             switch (_map.connectivityAlgorithm)
             {
                 case RMG_PATH_SL:
-                    if (_map.room[i].exitE > -1)
+                    if (_map.room[i].exitE > i)
                         mapConnectRooms_SL(_map, i, _map.room[i].exitE);
-                    if (_map.room[i].exitW > -1)
+                    if (_map.room[i].exitW > i)
                         mapConnectRooms_SL(_map, i, _map.room[i].exitW);
-                    if (_map.room[i].exitN > -1)
+                    if (_map.room[i].exitN > i)
                         mapConnectRooms_SL(_map, i, _map.room[i].exitN);
-                    if (_map.room[i].exitS > -1)
+                    if (_map.room[i].exitS > i)
                         mapConnectRooms_SL(_map, i, _map.room[i].exitS);
                 break;
                 case RMG_PATH_ND:
-                    if (_map.room[i].exitE > -1)
+                    if (_map.room[i].exitE != RMG_NOROOM)
                         mapConnectRooms_ND(_map, i, _map.room[i].exitE);
-                    if (_map.room[i].exitW > -1)
+                    if (_map.room[i].exitW != RMG_NOROOM)
                         mapConnectRooms_ND(_map, i, _map.room[i].exitW);
-                    if (_map.room[i].exitN > -1)
+                    if (_map.room[i].exitN != RMG_NOROOM)
                         mapConnectRooms_ND(_map, i, _map.room[i].exitN);
-                    if (_map.room[i].exitS > -1)
+                    if (_map.room[i].exitS != RMG_NOROOM)
                         mapConnectRooms_ND(_map, i, _map.room[i].exitS);
                 break;
                 case RMG_PATH_DW:
-                    if (_map.room[i].exitE > -1)
+                    if (_map.room[i].exitE != RMG_NOROOM)
                         mapConnectRooms_DW(_map, i, _map.room[i].exitE);
-                    if (_map.room[i].exitW > -1)
+                    if (_map.room[i].exitW != RMG_NOROOM)
                         mapConnectRooms_DW(_map, i, _map.room[i].exitW);
-                    if (_map.room[i].exitN > -1)
+                    if (_map.room[i].exitN != RMG_NOROOM)
                         mapConnectRooms_DW(_map, i, _map.room[i].exitN);
-                    if (_map.room[i].exitS > -1)
+                    if (_map.room[i].exitS != RMG_NOROOM)
                         mapConnectRooms_DW(_map, i, _map.room[i].exitS);
                 break;
                 case RMG_PATH_CC:
-                    if (_map.room[i].exitE > -1)
+                    if (_map.room[i].exitE != RMG_NOROOM)
                         mapConnectRooms_CC(_map, i, _map.room[i].exitE);
-                    if (_map.room[i].exitW > -1)
+                    if (_map.room[i].exitW != RMG_NOROOM)
                         mapConnectRooms_CC(_map, i, _map.room[i].exitW);
-                    if (_map.room[i].exitN > -1)
+                    if (_map.room[i].exitN != RMG_NOROOM)
                         mapConnectRooms_CC(_map, i, _map.room[i].exitN);
-                    if (_map.room[i].exitS > -1)
+                    if (_map.room[i].exitS != RMG_NOROOM)
                         mapConnectRooms_CC(_map, i, _map.room[i].exitS);
                 break;
                 default:

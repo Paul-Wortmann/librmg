@@ -41,13 +41,16 @@
 #define RMG_PATH_DW 2 // Drunken Walk
 #define RMG_PATH_CC 3 // Curved Corner
 
-#define RMG_NONE  0
-#define RMG_NORTH 1
-#define RMG_SOUTH 2
-#define RMG_EAST  3
-#define RMG_WEST  4
+#define RMG_NOROOM -1
+#define RMG_NONE    0
+#define RMG_NORTH   1
+#define RMG_SOUTH   2
+#define RMG_EAST    3
+#define RMG_WEST    4
 
 #define RMG_GEN_C1 0 // Cave 1
+#define RMG_GEN_C2 1 // Cave 2
+#define RMG_GEN_D1 2 // Dungeon 1
 
 namespace rmg
 {
@@ -74,10 +77,10 @@ namespace rmg
         uint16_t y = 0;
         uint16_t w = 0;
         uint16_t h = 0;
-        int16_t exitN = -1; // -1 for none, else connecting room ID
-        int16_t exitS = -1;
-        int16_t exitE = -1;
-        int16_t exitW = -1;
+        int16_t exitN = RMG_NOROOM; // -1 for none, else connecting room ID
+        int16_t exitS = RMG_NOROOM;
+        int16_t exitE = RMG_NOROOM;
+        int16_t exitW = RMG_NOROOM;
     };
 
     struct sMap
@@ -94,7 +97,8 @@ namespace rmg
         uint16_t roomAreaMax = 11 * 11; // max room area in tiles
         uint16_t roomAreaMin = 5 * 5; // min room area in tiles
         uint16_t floorAreaMin = 60; // percentage, min % floor area
-        uint16_t generationAlgorithm = RMG_GEN_C1;
+        uint16_t roomBorder = 2;
+        uint16_t generationAlgorithm = RMG_GEN_D1;
         uint16_t connectivityAlgorithm = RMG_PATH_SL;
         uint16_t connectivityComplexity = 50; // percentage, rand % connect neighbors
         uint16_t connectivityPadding = 1; // Tiles to pad on each side of generated paths, ie. path (width - 1 ) / 2
@@ -103,20 +107,30 @@ namespace rmg
     // --- librmg.cpp ---
     void mapInit(sMap &_map);
     void mapFree(sMap &_map);
+    void mapGen(sMap &_map);
 
     // --- librmg_rooms.cpp ---
     void mapFindRooms(sMap &_map);
+    uint32_t mapGetRoomArea(sMap &_map, uint16_t _r);
+    void mapRoomDiscardAllButLargest(sMap &_map);
     void mapInitRooms(sMap &_map);
 
     // --- librmg_utils.cpp ---
     void mapDraw(sMap &_map);
-    void genCircle(sMap &_map);
+    bool genCircleRoomOK(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r);
+    void genCircleRoom(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r);
     void mapPerimeterWalls(sMap &_map);
     uint32_t mapGetFloorArea(sMap &_map);
     void mapRemoveAnomalies(sMap &_map);
 
     // --- librmg_C1.cpp ---
     void genC1(sMap &_map);
+
+    // --- librmg_C2.cpp ---
+    void genC2(sMap &_map);
+
+    // --- librmg_D1.cpp ---
+    void genD1(sMap &_map);
 
     // --- librmg_connectivity.cpp ---
     void mapConnectRooms(sMap &_map);

@@ -79,20 +79,38 @@ namespace rmg
         }
     }
 
-    void genCircle(sMap &_map)
+    bool genCircleRoomOK(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r)
+    {
+        bool returnValue = true;
+        if (_map.tile == nullptr)
+            mapInit(_map);
+        if (_map.tile != nullptr)
+        {
+            for (uint32_t i = 0; i < _map.h; i++)
+            {
+                for (uint32_t j = 0; j < _map.w; j++)
+                {
+                    if ((((j - _x) * (j - _x)) + ((i - _y) * (i - _y))) < (_r * _r))
+                        if (_map.tile[(i * _map.w) + j].d == RMG_FLOOR)
+                            returnValue = false;
+                }
+            }
+        }
+        return returnValue;
+    }
+
+    void genCircleRoom(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r)
     {
         if (_map.tile == nullptr)
             mapInit(_map);
         if (_map.tile != nullptr)
         {
-            float level_r = (((_map.w / 2.0) < (_map.h / 2.0)) ? (_map.w / 2.0) : (_map.h / 2.0));
             for (uint32_t i = 0; i < _map.h; i++)
             {
                 for (uint32_t j = 0; j < _map.w; j++)
                 {
-                    _map.tile[(i * _map.w) + j].x = (j - (_map.w / 2.0f));
-                    _map.tile[(i * _map.w) + j].y = (i - (_map.h / 2.0f));
-                    _map.tile[(i * _map.w) + j].d = (((_map.tile[(i * _map.w) + j].x * _map.tile[(i * _map.w) + j].x) + (_map.tile[(i * _map.w) + j].y * _map.tile[(i * _map.w) + j].y)) < (level_r * level_r)) ? RMG_FLOOR : RMG_WALL;
+                    if ((((j - _x) * (j - _x)) + ((i - _y) * (i - _y))) < (_r * _r))
+                        _map.tile[(i * _map.w) + j].d = RMG_FLOOR;
                 }
             }
         }

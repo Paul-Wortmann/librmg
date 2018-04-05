@@ -64,6 +64,7 @@ namespace rmg
 
     static void mapDiscardMinRooms(sMap &_map)
     {
+        uint16_t discardCount = 0;
         if (_map.tile == nullptr)
             mapInit(_map);
         if (_map.tile != nullptr)
@@ -78,6 +79,7 @@ namespace rmg
                 }
                 if (tileCount < _map.roomAreaMin)
                 {
+                    discardCount++;
                     for (uint32_t j = 0; j < _map.tileCount; j++)
                     {
                         if (_map.tile[j].r == i)
@@ -89,6 +91,7 @@ namespace rmg
                 }
             }
         }
+        _map.roomCount -= discardCount;
     }
 
     static void mapRoomSizeLocation(sMap &_map)
@@ -126,6 +129,53 @@ namespace rmg
         }
     }
 
+
+    uint32_t mapGetRoomArea(sMap &_map, uint16_t _r)
+    {
+        uint32_t returnValue = 0;
+        if (_map.tile != nullptr)
+        {
+            for (uint32_t i = 0; i < _map.tileCount; i++)
+                if ((_map.tile[i].r == _r) && (_map.tile[i].d == RMG_FLOOR))
+                    returnValue++;
+        }
+        return returnValue;
+    }
+
+    void mapRoomDiscardAllButLargest(sMap &_map)
+    {
+        if ((_map.roomCount > 0) && (_map.room != nullptr) && (_map.tile != nullptr))
+        {
+            uint32_t roomSizeT = 0;
+            uint32_t roomSize = 0;
+            uint32_t roomNumber = 0;
+            for (uint16_t i = 0; i < _map.roomCount; i++)
+            {
+                roomSizeT = mapGetRoomArea(_map, i);
+                if (roomSizeT > roomSize)
+                {
+                    roomSize = roomSizeT;
+                    roomNumber = i;
+                }
+            }
+            for (uint32_t i = 0; i < _map.tileCount; i++)
+            {
+                if ((_map.tile[i].r != roomNumber) && (_map.tile[i].d == RMG_FLOOR))
+                {
+                    _map.tile[i].r = RMG_NOROOM;
+                    _map.tile[i].d = RMG_WALL;
+                }
+                else
+                    _map.tile[i].r = 0;
+            }
+        }
+        _map.roomCount = 1;
+        if (_map.room != nullptr)
+            delete _map.room;
+        _map.room = new sRoom[_map.roomCount];
+        mapRoomSizeLocation(_map);
+    }
+
     void mapInitRooms(sMap &_map)
     {
         mapFindRooms(_map);
@@ -136,6 +186,13 @@ namespace rmg
             if (_map.room != nullptr)
                 delete _map.room;
             _map.room = new sRoom[_map.roomCount];
+            for (uint16_t i = 0; i < _map.roomCount; i++)
+            {
+                _map.room[i].exitE = RMG_NOROOM;
+                _map.room[i].exitW = RMG_NOROOM;
+                _map.room[i].exitS = RMG_NOROOM;
+                _map.room[i].exitN = RMG_NOROOM;
+            }
             mapRoomSizeLocation(_map);
         }
     }

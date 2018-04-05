@@ -51,4 +51,20 @@ namespace rmg
         }
     }
 
+    void mapGen(sMap &_map)
+    {
+        switch (_map.generationAlgorithm)
+        {
+            case RMG_GEN_C1:
+                genC1(_map);
+            break;
+            case RMG_GEN_C2:
+                genC2(_map);
+            break;
+            case RMG_GEN_D1:
+                genD1(_map);
+            break;
+        }
+    }
+
 } // namespace rmg
