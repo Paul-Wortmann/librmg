@@ -141,7 +141,7 @@ namespace rmg
             int32_t deltaY = 0;
             if ((_map.room[i].exitE == RMG_NOROOM) && (_map.room[i].exitW == RMG_NOROOM) && (_map.room[i].exitN == RMG_NOROOM) && (_map.room[i].exitS == RMG_NOROOM))
             {
-                std::cout << "Lonely room detected!" << std::endl;
+                //std::cout << "Lonely room detected!" << std::endl;
                 deltaX = _map.room[i].x - _map.room[i-1].x;
                 deltaY = _map.room[i].y - _map.room[i-1].y;
                 if (abs(deltaX) < abs(deltaY))
@@ -240,8 +240,8 @@ namespace rmg
         uint16_t psy = ((direction == RMG_NORTH) || (direction == RMG_SOUTH)) ?  ((direction == RMG_NORTH) ? _map.room[_r1].posYMin : _map.room[_r1].posYMax) : _map.room[_r1].y;
         uint16_t pex = ((direction == RMG_EAST) || (direction == RMG_WEST)) ?  ((direction == RMG_WEST) ? _map.room[_r2].posXMin : _map.room[_r2].posXMax) : _map.room[_r2].x;
         uint16_t pey = ((direction == RMG_NORTH) || (direction == RMG_SOUTH)) ?  ((direction == RMG_SOUTH) ? _map.room[_r2].posYMin : _map.room[_r2].posYMax) : _map.room[_r2].y;
-        std::cout << "X1: " << psx  << " Y1: " << psy << std::endl;
-        std::cout << "X2: " << pex  << " Y2: " << pey << std::endl;
+        //std::cout << "X1: " << psx  << " Y1: " << psy << std::endl;
+        //std::cout << "X2: " << pex  << " Y2: " << pey << std::endl;
         if (direction == RMG_EAST)
         {
             while ((_map.tile[(psy * _map.w) + psx].d == RMG_WALL) && (psx < _map.room[_r1].posXMax))
@@ -272,11 +272,35 @@ namespace rmg
         }
         while ((psx != pex) || (psy != pey))
         {
-            _map.tile[(psy * _map.w) + psx].d = (_map.tile[(psy * _map.w) + psx].d == RMG_WALL) ? RMG_PATH : _map.tile[(psy * _map.w) + psx].d;
+            if (_map.tile[(psy * _map.w) + psx].d == RMG_WALL)
+            {
+                _map.tile[(psy * _map.w) + psx].d = RMG_PATH;
+                if (_map.connectivityPadding > 0)
+                {
+                    for (uint16_t i = 0; i <= _map.connectivityPadding; i++)
+                    {
+                        if (_map.tile[(psy * _map.w) + psx + i].d == RMG_WALL)
+                            _map.tile[(psy * _map.w) + psx + i].d = RMG_PATH;
+                        if (_map.tile[(psy * _map.w) + psx - i].d == RMG_WALL)
+                            _map.tile[(psy * _map.w) + psx - i].d = RMG_PATH;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w].d == RMG_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w].d = RMG_PATH;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w].d == RMG_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w].d = RMG_PATH;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w + i].d == RMG_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w + i].d = RMG_PATH;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w - i].d == RMG_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w - i].d = RMG_PATH;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w + i].d == RMG_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w + i].d = RMG_PATH;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w - i].d == RMG_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w - i].d = RMG_PATH;
+                    }
+                }
+            }
             psx = (psx == pex) ? psx : ((psx > pex) ? --psx : ++psx);
             psy = (psy == pey) ? psy : ((psy > pey) ? --psy : ++psy);
         }
-
     }
 
     // Straight Lines, 90 degree angle

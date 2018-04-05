@@ -28,15 +28,13 @@ namespace rmg
 
     static void genC2_internal(sMap &_map)
     {
-        uint32_t r_max = sqrt(_map.roomAreaMax);
-        uint32_t r_min = sqrt(_map.roomAreaMin);
         uint32_t blobCount = _map.density / _map.pass;
         for (uint32_t i = 0; i < _map.tileCount; i++)
             _map.tile[i].d = RMG_WALL;
         mapPerimeterWalls(_map);
         for (uint32_t i = 0; i < blobCount; i++)
         {
-            uint32_t r = (rand() % (r_max - r_min)) + r_min;
+            uint32_t r = (rand() % (_map.roomRadiusMax - _map.roomRadiusMin)) + _map.roomRadiusMin;
 
             uint32_t x = (rand() % (_map.w - r - r)) + r;
             uint32_t y = (rand() % (_map.h - r - r)) + r;

@@ -26,16 +26,97 @@
 namespace rmg
 {
 
+    bool genCircleRoomOK(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r)
+    {
+        bool returnValue = true;
+        if (_map.tile == nullptr)
+            mapInit(_map);
+        if (_map.tile != nullptr)
+        {
+            for (uint32_t i = 0; i < _map.h; i++)
+            {
+                for (uint32_t j = 0; j < _map.w; j++)
+                {
+                    if ((((j - _x) * (j - _x)) + ((i - _y) * (i - _y))) < (_r * _r))
+                        if (_map.tile[(i * _map.w) + j].d == RMG_FLOOR)
+                            returnValue = false;
+                }
+            }
+        }
+        return returnValue;
+    }
+
+    void genCircleRoom(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r)
+    {
+        if (_map.tile == nullptr)
+            mapInit(_map);
+        if (_map.tile != nullptr)
+        {
+            for (uint32_t i = 0; i < _map.h; i++)
+            {
+                for (uint32_t j = 0; j < _map.w; j++)
+                {
+                    if ((((j - _x) * (j - _x)) + ((i - _y) * (i - _y))) < (_r * _r))
+                        _map.tile[(i * _map.w) + j].d = RMG_FLOOR;
+                }
+            }
+        }
+    }
+
+    bool genSquareRoomOK(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r)
+    {
+        bool returnValue = true;
+        if (((_x-_r) <= 0) || ((_x+_r) >= _map.w) || ((_y-_r) <= 0) || ((_y+_r) >= _map.h))
+            return false;
+        if (_map.tile == nullptr)
+            mapInit(_map);
+        if (_map.tile != nullptr)
+        {
+            for (uint32_t i = _y-_r; i < _y+_r; i++)
+            {
+                for (uint32_t j = _x-_r; j < _x+_r; j++)
+                {
+                    if (_map.tile[(i * _map.w) + j].d == RMG_FLOOR)
+                        returnValue = false;
+                }
+            }
+        }
+        return returnValue;
+    }
+
+    void genSquareRoom(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r)
+    {
+        if (_map.tile == nullptr)
+            mapInit(_map);
+        if (_map.tile != nullptr)
+        {
+            for (uint32_t i = _y-_r; i < _y+_r; i++)
+            {
+                for (uint32_t j = _x-_r; j < _x+_r; j++)
+                {
+                    _map.tile[(i * _map.w) + j].d = RMG_FLOOR;
+                }
+            }
+        }
+    }
+
     static void mapFindRoom(sMap &_map, uint32_t i)
     {
-        if ((!_map.tile[i].p) && (_map.tile[i].d == RMG_FLOOR))
+        if (i  < _map.tileCount)
         {
-            _map.tile[i].p = true;
-            _map.tile[i].r = _map.roomCount;
-            mapFindRoom(_map, i+1);
-            mapFindRoom(_map, i-1);
-            mapFindRoom(_map, i+_map.w);
-            mapFindRoom(_map, i-_map.w);
+            if ((!_map.tile[i].p) && (_map.tile[i].d == RMG_FLOOR))
+            {
+                _map.tile[i].p = true;
+                _map.tile[i].r = _map.roomCount;
+                if (((i + 1) > 0) && ((i + 1) < _map.tileCount))
+                    mapFindRoom(_map, i + 1);
+                if (((i - 1) > 0) && ((i - 1) < _map.tileCount))
+                    mapFindRoom(_map, i - 1);
+                if (((i + _map.w) > 0) && ((i + _map.w) < _map.tileCount))
+                    mapFindRoom(_map, i + _map.w);
+                if (((i - _map.w) > 0) && ((i - _map.w) < _map.tileCount))
+                    mapFindRoom(_map, i - _map.w);
+            }
         }
     }
 
@@ -77,7 +158,7 @@ namespace rmg
                     if ((_map.tile[j].r == i) && (_map.tile[j].d == RMG_FLOOR))
                         tileCount++;
                 }
-                if (tileCount < _map.roomAreaMin)
+                if (tileCount < (_map.roomRadiusMin * _map.roomRadiusMin))
                 {
                     discardCount++;
                     for (uint32_t j = 0; j < _map.tileCount; j++)

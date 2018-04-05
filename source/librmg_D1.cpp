@@ -28,21 +28,34 @@ namespace rmg
 
     static void genD1_internal(sMap &_map)
     {
+        uint16_t roomShape = _map.roomShape;
+        uint32_t roomMax = _map.density * _map.pass;
         for (uint32_t i = 0; i < _map.tileCount; i++)
             _map.tile[i].d = RMG_WALL;
         mapPerimeterWalls(_map);
-        uint32_t rMax = sqrt(_map.roomAreaMax);
-        uint32_t rMin = sqrt(_map.roomAreaMin);
-        std::cout << "rMin: " << rMin << " rMax: " << rMax << std::endl;
-        if (rMax > RAND_MAX);
-        for (uint32_t i = 0; i < 10; i++)
+        for (uint16_t i = 0; i < roomMax; i++)
         {
-            uint32_t r = (rand() % (7)) + 1;
+            uint32_t r = (rand() % (_map.roomRadiusMax - _map.roomRadiusMin)) + _map.roomRadiusMin;
 
             uint32_t x = (rand() % (_map.w - r - r)) + r;
             uint32_t y = (rand() % (_map.h - r - r)) + r;
-            if (genCircleRoomOK(_map, x, y, r + _map.roomBorder))
-                genCircleRoom(_map, x, y, r);
+            if ((x > 1) && (x < _map.w-1) && (y > 1) && (y < _map.h-1) && (r < _map.w/4))
+            {
+                if (_map.roomShape == RMG_RANDOM)
+                {
+                    roomShape = ((rand() % 100) < 50) ? RMG_CIRCLE : RMG_SQUARE;
+                }
+                if (roomShape == RMG_CIRCLE)
+                {
+                    if (genCircleRoomOK(_map, x, y, r + _map.roomBorder))
+                        genCircleRoom(_map, x, y, r);
+                }
+                if (roomShape == RMG_SQUARE)
+                {
+                    if (genSquareRoomOK(_map, x, y, r + _map.roomBorder))
+                        genSquareRoom(_map, x, y, r);
+                }
+            }
         }
 
     }

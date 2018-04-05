@@ -64,6 +64,9 @@ namespace rmg
             case RMG_GEN_D1:
                 genD1(_map);
             break;
+            case RMG_GEN_T1:
+                genT1(_map);
+            break;
         }
     }
 
