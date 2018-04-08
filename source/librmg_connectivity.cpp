@@ -198,28 +198,71 @@ namespace rmg
                         mapConnectRooms_ND(_map, i, _map.room[i].exitS);
                 break;
                 case RMG_PATH_DW:
-                    if (_map.room[i].exitE != RMG_NOROOM)
+                    if (_map.room[i].exitE > i)
                         mapConnectRooms_DW(_map, i, _map.room[i].exitE);
-                    if (_map.room[i].exitW != RMG_NOROOM)
+                    if (_map.room[i].exitW > i)
                         mapConnectRooms_DW(_map, i, _map.room[i].exitW);
-                    if (_map.room[i].exitN != RMG_NOROOM)
+                    if (_map.room[i].exitN > i)
                         mapConnectRooms_DW(_map, i, _map.room[i].exitN);
-                    if (_map.room[i].exitS != RMG_NOROOM)
+                    if (_map.room[i].exitS > i)
                         mapConnectRooms_DW(_map, i, _map.room[i].exitS);
                 break;
                 case RMG_PATH_CC:
-                    if (_map.room[i].exitE != RMG_NOROOM)
+                    if (_map.room[i].exitE > i)
                         mapConnectRooms_CC(_map, i, _map.room[i].exitE);
-                    if (_map.room[i].exitW != RMG_NOROOM)
+                    if (_map.room[i].exitW > i)
                         mapConnectRooms_CC(_map, i, _map.room[i].exitW);
-                    if (_map.room[i].exitN != RMG_NOROOM)
+                    if (_map.room[i].exitN > i)
                         mapConnectRooms_CC(_map, i, _map.room[i].exitN);
-                    if (_map.room[i].exitS != RMG_NOROOM)
+                    if (_map.room[i].exitS  > i)
                         mapConnectRooms_CC(_map, i, _map.room[i].exitS);
                 break;
                 default:
                     // throw error / set flag
                 break;
+            }
+        }
+        // use path finder to locate unreachable rooms and try connect them.
+        if (_map.roomCount > 0)
+        {
+            for (uint16_t i = 0; i < _map.roomCount-1; i++)
+            {
+                int16_t r1Dir = RMG_NOROOM;
+                int16_t r2Dir = RMG_NOROOM;
+                sPath pathT;
+                pathT.sx = _map.room[i].x;
+                pathT.sy = _map.room[i].y;
+                pathT.ex = _map.room[i+1].x;
+                pathT.ey = _map.room[i+1].y;
+                if (pathAS(_map, pathT) == false)
+                {
+                    if (_map.room[i].exitE)
+                        r1Dir = RMG_EAST;
+                    else if (_map.room[i].exitW)
+                        r1Dir = RMG_WEST;
+                    else if (_map.room[i].exitS)
+                        r1Dir = RMG_SOUTH;
+                    else if (_map.room[i].exitN)
+                        r1Dir = RMG_NORTH;
+                    if (_map.room[i+1].exitE)
+                        r2Dir = RMG_EAST;
+                    else if (_map.room[i+1].exitW)
+                        r2Dir = RMG_WEST;
+                    else if (_map.room[i+1].exitS)
+                        r2Dir = RMG_SOUTH;
+                    else if (_map.room[i+1].exitN)
+                        r2Dir = RMG_NORTH;
+                    // try connect
+                    if (_map.connectivityAlgorithm == RMG_PATH_SL)
+                        mapConnectRooms_SL(_map, i, i+1);
+                    if (_map.connectivityAlgorithm == RMG_PATH_ND)
+                        mapConnectRooms_ND(_map, i, i+1);
+                    if (_map.connectivityAlgorithm == RMG_PATH_DW)
+                        mapConnectRooms_DW(_map, i, i+1);
+                    if (_map.connectivityAlgorithm == RMG_PATH_CC)
+                        mapConnectRooms_CC(_map, i, i+1);
+                    pathASFree(pathT);
+                }
             }
         }
     }

@@ -66,6 +66,7 @@
 #define RMG_OBJECT_TREE     5
 #define RMG_OBJECT_AS_START 6
 #define RMG_OBJECT_AS_END   7
+#define RMG_OBJECT_AS_PATH  8
 
 
 #define RMG_ROOM_EMPTY      0
@@ -80,9 +81,9 @@
 #define RMG_AS_OPEN   3
 #define RMG_AS_CLOSED 4
 
-#define RMG_AS_MOV_D  14
+#define RMG_AS_MOV_D  20
 #define RMG_AS_MOV_S  10
-#define RMG_AS_MOV_H  3
+#define RMG_AS_MOV_H  10
 
 namespace rmg
 {
@@ -174,6 +175,8 @@ namespace rmg
 
     // --- librmg_utils.cpp ---
     void mapDraw(sMap &_map);
+    uint32_t mapGetFloorMin(sMap &_map);
+    uint32_t mapGetFloorMax(sMap &_map);
     void mapPerimeterWalls(sMap &_map);
     uint32_t mapGetFloorArea(sMap &_map);
     void mapRemoveAnomalies(sMap &_map);
@@ -198,6 +201,7 @@ namespace rmg
     void mapConnectRooms_CC(sMap &_map, uint16_t _r1, uint16_t _r2);
 
     // --- librmg_pathing.cpp ---
+    void pathASFree(sPath &_path);
     bool pathAS(sMap &_map, sPath &_path);
 
 } // namespace rmg

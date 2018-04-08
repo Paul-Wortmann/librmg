@@ -26,6 +26,15 @@
 namespace rmg
 {
 
+    void pathASFree(sPath &_path)
+    {
+        if (_path.path != nullptr)
+        {
+            delete _path.path;
+            _path.path = nullptr;
+        }
+    }
+
     static void pathAScalcTile(sMap &_map, sPath &_path, uint32_t _p, uint32_t _t)
     {
         if (_map.tile[_t].L == RMG_AS_CLOSED)
@@ -34,14 +43,14 @@ namespace rmg
             return;
         if (_map.tile[_t].L == RMG_AS_OPEN)
         {
-            uint32_t newG = (((_map.tile[_t].x == _map.tile[_p].x || _map.tile[_t].y == _map.tile[_p].y)) ? RMG_AS_MOV_S : RMG_AS_MOV_D);
-            if ((_map.tile[_map.tile[_t].P].G + _map.tile[_t].G) > (_map.tile[_map.tile[_t].P].G + newG))
+            uint32_t newG = (((_map.tile[_t].x == _map.tile[_p].x) || (_map.tile[_t].y == _map.tile[_p].y)) ? RMG_AS_MOV_S : RMG_AS_MOV_D);
+            if ((_map.tile[_p].G + _map.tile[_t].G) >= (_map.tile[_p].G + newG))
                 return;
         }
         _map.tile[_t].P = _p;
         _map.tile[_t].L = RMG_AS_OPEN;
         _map.tile[_t].H = (abs(_map.tile[_t].x - _path.ex) + abs(_map.tile[_t].y - _path.ey)) * RMG_AS_MOV_H;
-        _map.tile[_t].G = _map.tile[_map.tile[_t].P].G +  (((_map.tile[_t].x == _map.tile[_p].x || _map.tile[_t].y == _map.tile[_p].y)) ? RMG_AS_MOV_S : RMG_AS_MOV_D);
+        _map.tile[_t].G = _map.tile[_p].G + (((_map.tile[_t].x == _map.tile[_p].x) || (_map.tile[_t].y == _map.tile[_p].y)) ? RMG_AS_MOV_S : RMG_AS_MOV_D);
         _map.tile[_t].F = _map.tile[_t].H + _map.tile[_t].G;
     }
 
@@ -102,17 +111,15 @@ namespace rmg
         {
             for (uint32_t j = 0; j < _map.w; j++)
             {
-                _map.tile[(i * _map.w) + j].x = j;
-                _map.tile[(i * _map.w) + j].y = i;
+                uint32_t tile = (i * _map.w) + j;
+                _map.tile[tile].x = j;
+                _map.tile[tile].y = i;
+                _map.tile[tile].L = (_map.tile[tile].d == RMG_WALL) ? RMG_AS_CLOSED : RMG_AS_NONE;
+                _map.tile[tile].A = RMG_AS_NONE;
             }
         }
         uint32_t st = (_path.sy * _map.w) + _path.sx;
         uint32_t et = (_path.ey * _map.w) + _path.ex;
-        for (uint32_t i = 0; i < _map.tileCount; i++)
-        {
-            _map.tile[i].L = (_map.tile[i].d == RMG_WALL) ? RMG_AS_CLOSED : RMG_AS_NONE;
-            _map.tile[i].A = RMG_AS_NONE;
-        }
         _map.tile[st].A = RMG_AS_START;
         _map.tile[st].L = RMG_AS_CLOSED;
         _map.tile[et].A = RMG_AS_END;
@@ -123,14 +130,21 @@ namespace rmg
         if (!pathASinternal(_map, _path, st, st))
             return false;
         _path.length = 0;
+        //build path data
         uint32_t pathPosition = et;
         while (pathPosition != st)
         {
-            _map.tile[pathPosition].o = RMG_PATH;
             pathPosition = _map.tile[pathPosition].P;
             _path.length++;
         }
-        //build path data
+        _path.path = new uint32_t[_path.length];
+        pathPosition = et;
+        uint32_t i = _path.length;
+        while (pathPosition != st)
+        {
+            _path.path[--i] = pathPosition;
+            pathPosition = _map.tile[pathPosition].P;
+        }
         return true;
     }
 

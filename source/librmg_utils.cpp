@@ -39,15 +39,13 @@ namespace rmg
                         case RMG_WALL:
                             std::cout << "O";
                         break;
-                        case RMG_PATH:
-                            std::cout << ".";
-                        break;
                         case RMG_DOOR:
                             std::cout << "D";
                         break;
                         case RMG_STAIRS:
                             std::cout << "S";
                         break;
+                        case RMG_PATH:
                         case RMG_FLOOR:
                             switch (_map.tile[(i * _map.w) + j].o)
                             {
@@ -63,6 +61,9 @@ namespace rmg
                                 break;
                                 case RMG_OBJECT_AS_END:
                                     std::cout << "E";
+                                break;
+                                case RMG_OBJECT_AS_PATH:
+                                    std::cout << ".";
                                 break;
                                 default:
                                     std::cout << ".";
@@ -90,6 +91,36 @@ namespace rmg
             //std::cout << "pos X: " << _map.room[roomID].x << std::endl;
             //std::cout << "pos Y: " << _map.room[roomID].y << std::endl;
         }
+    }
+
+    uint32_t mapGetFloorMin(sMap &_map)
+    {
+        if (_map.tile == nullptr)
+            mapInit(_map);
+        if (_map.tile != nullptr)
+        {
+            for (uint32_t i = 0; i < _map.tileCount; i++)
+            {
+                if (_map.tile[i].d == RMG_FLOOR)
+                    return i;
+            }
+        }
+        return 0;
+    }
+
+    uint32_t mapGetFloorMax(sMap &_map)
+    {
+        if (_map.tile == nullptr)
+            mapInit(_map);
+        if (_map.tile != nullptr)
+        {
+            for (uint32_t i = _map.tileCount-_map.w; i >= 0; i--)
+            {
+                if (_map.tile[i].d == RMG_FLOOR)
+                    return i;
+            }
+        }
+        return 0;
     }
 
     void mapPerimeterWalls(sMap &_map)
@@ -175,6 +206,7 @@ namespace rmg
                         if ((_map.tile[tileT+1].d == RMG_FLOOR)
                          && (_map.tile[tileT-1].d == RMG_FLOOR))
                         {
+                            std::cout << "here" << std::endl;
                             _map.tile[tileT].d = RMG_FLOOR;
                             _map.tile[tileT].r = _map.tile[tileT+1].r;
                         }

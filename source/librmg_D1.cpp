@@ -88,6 +88,7 @@ namespace rmg
             mapInitRooms(_map);
             mapRemoveAnomalies(_map);
             mapConnectRooms(_map);
+            mapRemoveAnomalies(_map);
         }
     }
 
