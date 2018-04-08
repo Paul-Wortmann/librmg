@@ -104,9 +104,9 @@ namespace rmg
     {
         if (i  < _map.tileCount)
         {
-            if ((!_map.tile[i].p) && (_map.tile[i].d == RMG_FLOOR))
+            if ((!_map.tile[i].c) && (_map.tile[i].d == RMG_FLOOR))
             {
-                _map.tile[i].p = true;
+                _map.tile[i].c = true;
                 _map.tile[i].r = _map.roomCount;
                 if (((i + 1) > 0) && ((i + 1) < _map.tileCount))
                     mapFindRoom(_map, i + 1);
@@ -130,11 +130,11 @@ namespace rmg
             for (uint32_t i = 0; i < _map.tileCount; i++)
             {
                 _map.tile[i].r = 0;
-                _map.tile[i].p = false;
+                _map.tile[i].c = false;
             }
             for (uint32_t i = 0; i < _map.tileCount; i++)
             {
-                if ((!_map.tile[i].p) && (_map.tile[i].d == RMG_FLOOR))
+                if ((!_map.tile[i].c) && (_map.tile[i].d == RMG_FLOOR))
                 {
                     mapFindRoom(_map, i);
                     _map.roomCount++;
@@ -158,7 +158,7 @@ namespace rmg
                     if ((_map.tile[j].r == i) && (_map.tile[j].d == RMG_FLOOR))
                         tileCount++;
                 }
-                if (tileCount < (_map.roomRadiusMin * _map.roomRadiusMin))
+                if (tileCount < (uint32_t)(_map.roomRadiusMin * _map.roomRadiusMin))
                 {
                     discardCount++;
                     for (uint32_t j = 0; j < _map.tileCount; j++)

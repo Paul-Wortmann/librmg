@@ -58,12 +58,15 @@
 #define RMG_GEN_D1 2 // Dungeon 1
 #define RMG_GEN_T1 3 // Town 1
 
-#define RMG_OBJECT_NONE  0
-#define RMG_OBJECT_DOOR  1
-#define RMG_OBJECT_CHEST 2
-#define RMG_OBJECT_KEY   3
-#define RMG_OBJECT_LEVER 4
-#define RMG_OBJECT_TREE  5
+#define RMG_OBJECT_NONE     0
+#define RMG_OBJECT_DOOR     1
+#define RMG_OBJECT_CHEST    2
+#define RMG_OBJECT_KEY      3
+#define RMG_OBJECT_LEVER    4
+#define RMG_OBJECT_TREE     5
+#define RMG_OBJECT_AS_START 6
+#define RMG_OBJECT_AS_END   7
+
 
 #define RMG_ROOM_EMPTY      0
 #define RMG_ROOM_BRIDGE     1
@@ -71,17 +74,45 @@
 #define RMG_ROOM_BLACKSMITH 3
 #define RMG_ROOM_STORE      4
 
+#define RMG_AS_NONE   0
+#define RMG_AS_START  1
+#define RMG_AS_END    2
+#define RMG_AS_OPEN   3
+#define RMG_AS_CLOSED 4
+
+#define RMG_AS_MOV_D  14
+#define RMG_AS_MOV_S  10
+#define RMG_AS_MOV_H  3
+
 namespace rmg
 {
 
+    struct sPath
+    {
+        uint32_t *path = nullptr; // array of path tile numbers
+        uint32_t length = 0;
+        uint32_t position = 0; // current position on path
+        uint32_t sx = 0;
+        uint32_t sy = 0;
+        uint32_t ex = 0;
+        uint32_t ey = 0;
+    };
+
     struct sTile
     {
-        bool     p = false; // processed flag
+        bool     c = false; // completed flag
         uint16_t d = RMG_FLOOR; // data
         uint16_t o = RMG_OBJECT_NONE; // object
         uint16_t r = 0; // room number
         uint32_t x = 0;
         uint32_t y = 0;
+
+        uint32_t H = 0; // Heuristic cost
+        uint32_t G = 0; // Movement cost
+        uint32_t F = 0; // Total cost
+        uint32_t A = RMG_AS_NONE; // Attribute
+        uint32_t L = RMG_AS_NONE; // List
+        uint32_t P = 0; // Parent tile
     };
 
     struct sRoom
@@ -166,6 +197,8 @@ namespace rmg
     void mapConnectRooms_DW(sMap &_map, uint16_t _r1, uint16_t _r2);
     void mapConnectRooms_CC(sMap &_map, uint16_t _r1, uint16_t _r2);
 
+    // --- librmg_pathing.cpp ---
+    bool pathAS(sMap &_map, sPath &_path);
 
 } // namespace rmg
 

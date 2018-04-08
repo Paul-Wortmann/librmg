@@ -37,7 +37,7 @@ namespace rmg
                     switch (_map.tile[(i * _map.w) + j].d)
                     {
                         case RMG_WALL:
-                            std::cout << " ";
+                            std::cout << "O";
                         break;
                         case RMG_PATH:
                             std::cout << ".";
@@ -52,13 +52,20 @@ namespace rmg
                             switch (_map.tile[(i * _map.w) + j].o)
                             {
                                 case RMG_OBJECT_NONE:
-                                    std::cout << _map.tile[(i * _map.w) + j].r;
+                                    std::cout << " ";
+                                    //std::cout << _map.tile[(i * _map.w) + j].r;
                                 break;
                                 case RMG_OBJECT_TREE:
                                     std::cout << "T";
                                 break;
+                                case RMG_OBJECT_AS_START:
+                                    std::cout << "S";
+                                break;
+                                case RMG_OBJECT_AS_END:
+                                    std::cout << "E";
+                                break;
                                 default:
-                                    std::cout << "O";
+                                    std::cout << ".";
                                 break;
                             }
                         break;
