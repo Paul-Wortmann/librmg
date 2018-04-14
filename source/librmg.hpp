@@ -29,13 +29,34 @@
 #include <iostream>
 #include <ctime>
 #include <random>
+#include <dirent.h>
 
-#define RMG_WALL   0
-#define RMG_FLOOR  1
-#define RMG_LIQUID 2 // river / lava
-#define RMG_PATH   3
-#define RMG_DOOR   4
-#define RMG_STAIRS 5
+//---- Layer - Base ----//
+#define RMG_BASE_WALL   0
+#define RMG_BASE_FLOOR  1
+#define RMG_BASE_LIQUID 2
+
+//---- Layer - Object ----//
+#define RMG_OBJECT_NONE      0
+#define RMG_OBJECT_AS_START  1
+#define RMG_OBJECT_AS_END    2
+#define RMG_OBJECT_AS_PATH   3
+#define RMG_OBJECT_DOOR      4
+#define RMG_OBJECT_CHEST     5
+#define RMG_OBJECT_CHEST_KEY 6
+#define RMG_OBJECT_KEY       7
+#define RMG_OBJECT_LEVER     8
+#define RMG_OBJECT_TREE      9
+#define RMG_OBJECT_STAIRS    10
+
+//---- Layer - Event ----//
+#define RMG_EVENT_NONE         0
+#define RMG_EVENT_TRIGGER      1
+#define RMG_EVENT_TRIGGERABLE  2
+#define RMG_EVENT_PLAYER_GOAL  3
+#define RMG_EVENT_SPAWN_NPC    4
+#define RMG_EVENT_SPAWN_BOSS   5
+#define RMG_EVENT_SPAWN_PLAYER 6
 
 #define RMG_PATH_SL 0 // Straight Line
 #define RMG_PATH_ND 1 // Ninety Degree angle lines
@@ -56,18 +77,9 @@
 #define RMG_GEN_C1 0 // Cave 1
 #define RMG_GEN_C2 1 // Cave 2
 #define RMG_GEN_D1 2 // Dungeon 1
-#define RMG_GEN_T1 3 // Town 1
-
-#define RMG_OBJECT_NONE     0
-#define RMG_OBJECT_DOOR     1
-#define RMG_OBJECT_CHEST    2
-#define RMG_OBJECT_KEY      3
-#define RMG_OBJECT_LEVER    4
-#define RMG_OBJECT_TREE     5
-#define RMG_OBJECT_AS_START 6
-#define RMG_OBJECT_AS_END   7
-#define RMG_OBJECT_AS_PATH  8
-
+#define RMG_GEN_D2 3 // Dungeon 2
+#define RMG_GEN_M1 4 // Maze 1
+#define RMG_GEN_T1 5 // Town 1
 
 #define RMG_ROOM_EMPTY      0
 #define RMG_ROOM_BRIDGE     1
@@ -88,6 +100,26 @@
 namespace rmg
 {
 
+    struct sPrefabTile
+    {
+        uint16_t b = RMG_BASE_FLOOR;
+        uint16_t o = RMG_OBJECT_NONE;
+        uint16_t e = RMG_EVENT_NONE;
+    };
+
+    struct sPrefab
+    {
+        uint32_t count = 0;
+        sPrefabTile *tile = nullptr;
+    };
+
+    struct sPrefabData
+    {
+        uint32_t count = 0;
+        std::string *filename = nullptr;
+        sPrefab *prefab = nullptr;
+    };
+
     struct sPath
     {
         uint32_t *path = nullptr; // array of path tile numbers
@@ -102,8 +134,9 @@ namespace rmg
     struct sTile
     {
         bool     c = false; // completed flag
-        uint16_t d = RMG_FLOOR; // data
-        uint16_t o = RMG_OBJECT_NONE; // object
+        uint16_t d = RMG_BASE_FLOOR;
+        uint16_t o = RMG_OBJECT_NONE;
+        uint16_t e = RMG_EVENT_NONE;
         uint16_t r = 0; // room number
         uint32_t x = 0;
         uint32_t y = 0;
@@ -164,12 +197,12 @@ namespace rmg
     void mapGen(sMap &_map);
 
     // --- librmg_rooms.cpp ---
-    bool genCircleRoomOK(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r);
-    void genCircleRoom(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r);
-    bool genSquareRoomOK(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r);
-    void genSquareRoom(sMap &_map, uint32_t _x, uint32_t _y, uint32_t _r);
+    bool genCircleRoomOK(sMap &_map, const uint32_t &_x, const uint32_t &_y, const uint32_t &_r);
+    void genCircleRoom(sMap &_map, const uint32_t &_x, const uint32_t &_y, const uint32_t &_r);
+    bool genSquareRoomOK(sMap &_map, const uint32_t &_x, const uint32_t &_y, const uint32_t &_r);
+    void genSquareRoom(sMap &_map, const uint32_t &_x, const uint32_t &_y, const uint32_t &_r);
     void mapFindRooms(sMap &_map);
-    uint32_t mapGetRoomArea(sMap &_map, uint16_t _r);
+    uint32_t mapGetRoomArea(sMap &_map, const uint32_t &_r);
     void mapRoomDiscardAllButLargest(sMap &_map);
     void mapInitRooms(sMap &_map);
 
@@ -190,19 +223,28 @@ namespace rmg
     // --- librmg_D1.cpp ---
     void genD1(sMap &_map);
 
+    // --- librmg_D2.cpp ---
+    void genD2(sMap &_map);
+
+    // --- librmg_M1.cpp ---
+    void genM1(sMap &_map);
+
     // --- librmg_T1.cpp ---
     void genT1(sMap &_map);
 
     // --- librmg_connectivity.cpp ---
     void mapConnectRooms(sMap &_map);
-    void mapConnectRooms_SL(sMap &_map, uint16_t _r1, uint16_t _r2);
-    void mapConnectRooms_ND(sMap &_map, uint16_t _r1, uint16_t _r2);
-    void mapConnectRooms_DW(sMap &_map, uint16_t _r1, uint16_t _r2);
-    void mapConnectRooms_CC(sMap &_map, uint16_t _r1, uint16_t _r2);
+    void mapConnectRooms_SL(sMap &_map, const uint16_t &_r1, const uint16_t &_r2);
+    void mapConnectRooms_ND(sMap &_map, const uint16_t &_r1, const uint16_t &_r2);
+    void mapConnectRooms_DW(sMap &_map, const uint16_t &_r1, const uint16_t &_r2);
+    void mapConnectRooms_CC(sMap &_map, const uint16_t &_r1, const uint16_t &_r2);
 
     // --- librmg_pathing.cpp ---
     void pathASFree(sPath &_path);
     bool pathAS(sMap &_map, sPath &_path);
+
+    // --- librmg_prefab.cpp ---
+    bool prefabFind(sPrefabData &_prefabData);
 
 } // namespace rmg
 

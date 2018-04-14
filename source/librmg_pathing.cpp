@@ -114,7 +114,7 @@ namespace rmg
                 uint32_t tile = (i * _map.w) + j;
                 _map.tile[tile].x = j;
                 _map.tile[tile].y = i;
-                _map.tile[tile].L = (_map.tile[tile].d == RMG_WALL) ? RMG_AS_CLOSED : RMG_AS_NONE;
+                _map.tile[tile].L = (_map.tile[tile].d == RMG_BASE_WALL) ? RMG_AS_CLOSED : RMG_AS_NONE;
                 _map.tile[tile].A = RMG_AS_NONE;
             }
         }

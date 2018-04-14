@@ -29,7 +29,7 @@ namespace rmg
     static void genT1_internal(sMap &_map)
     {
         for (uint32_t i = 0; i < _map.tileCount; i++)
-            _map.tile[i].d = RMG_FLOOR;
+            _map.tile[i].d = RMG_BASE_FLOOR;
         bool seeded = (_map.seed != 0);
         if (seeded)
         {
@@ -47,9 +47,9 @@ namespace rmg
         }
         for (uint32_t i = 0; i < _map.tileCount; i++)
         {
-            if (_map.tile[i].d == RMG_WALL)
+            if (_map.tile[i].d == RMG_BASE_WALL)
             {
-                _map.tile[i].d = RMG_FLOOR;
+                _map.tile[i].d = RMG_BASE_FLOOR;
                 _map.tile[i].o = RMG_OBJECT_TREE;
             }
         }

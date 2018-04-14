@@ -31,15 +31,15 @@ namespace rmg
         uint16_t roomShape = _map.roomShape;
         uint32_t roomMax = _map.density * _map.pass;
         for (uint32_t i = 0; i < _map.tileCount; i++)
-            _map.tile[i].d = RMG_WALL;
+            _map.tile[i].d = RMG_BASE_WALL;
         mapPerimeterWalls(_map);
-        for (uint16_t i = 0; i < roomMax; i++)
+        for (uint32_t i = 0; i < roomMax; i++)
         {
             uint32_t r = (rand() % (_map.roomRadiusMax - _map.roomRadiusMin)) + _map.roomRadiusMin;
 
-            uint32_t x = (rand() % (_map.w - r - r)) + r;
-            uint32_t y = (rand() % (_map.h - r - r)) + r;
-            if ((x > 1) && (x < _map.w-1) && (y > 1) && (y < _map.h-1) && (r < _map.w/4))
+            int32_t x = (rand() % (_map.w - r - r)) + r;
+            int32_t y = (rand() % (_map.h - r - r)) + r;
+            if ((x > 1) && (x < _map.w-1) && (y > 1) && (y < _map.h-1))
             {
                 if (_map.roomShape == RMG_RANDOM)
                 {
@@ -86,9 +86,8 @@ namespace rmg
                 }
             }
             mapInitRooms(_map);
-            mapRemoveAnomalies(_map);
             mapConnectRooms(_map);
-            mapRemoveAnomalies(_map);
+            //mapRemoveAnomalies(_map);
         }
     }
 
