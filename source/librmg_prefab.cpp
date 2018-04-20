@@ -26,12 +26,12 @@
 namespace rmg
 {
 
-    bool prefabFind(sPrefabData &_prefabData)
+    bool prefabFind(sMap &_map, sPrefabData &_prefabData)
     {
         _prefabData.count = 0;;
         DIR *dir;
         struct dirent *ent;
-        if ((dir = opendir ("data/prefabs")) != nullptr)
+        if ((dir = opendir (_map.prefabPath.c_str())) != nullptr)
         {
             while ((ent = readdir (dir)) != nullptr)
             {

@@ -57,7 +57,6 @@ namespace rmg
                 }
             }
         }
-
     }
 
     void genD1(sMap &_map)
@@ -81,7 +80,7 @@ namespace rmg
                     _map.seed = time(NULL);
                     srand (_map.seed);
                     genD1_internal(_map);
-                    if (mapGetFloorArea(_map) > (_map.tileCount / _map.floorAreaMin))
+                    if ((mapGetFloorArea(_map) > (_map.tileCount / _map.floorAreaMin)) && (_map.roomCount >= _map.roomMin))
                         i = _map.pass;
                 }
             }

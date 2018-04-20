@@ -26,10 +26,242 @@
 namespace rmg
 {
 
+    static void genM1_maze(sMap &_map, const uint32_t &_tile)
+    {
+        uint16_t tileCount = 4;
+        uint16_t loopCount = 0; // exit instead of getting stuck in the loop
+        while (tileCount > 0)
+        {
+            tileCount = 0;
+            uint32_t next_tile =_tile - _map.w;
+            if (!_map.tile[next_tile].c)
+                tileCount++;
+            next_tile =_tile + _map.w;
+            if (!_map.tile[next_tile].c)
+                tileCount++;
+            next_tile =_tile - 1;
+            if (!_map.tile[next_tile].c)
+                tileCount++;
+            next_tile =_tile + 1;
+            if (!_map.tile[next_tile].c)
+                tileCount++;
+            loopCount++;
+            if (loopCount > (_map.pass * _map.directionBiasStrength))
+                tileCount = 0;
+            uint32_t randBase = 25;
+            uint32_t direction = _map.directionBias;
+            uint32_t directionRand = (direction == RMG_NONE) ? (rand() % (randBase * 4)) :  (rand() % (randBase * (4 + _map.directionBiasStrength)));
+            if (directionRand < randBase)
+                direction = RMG_NORTH;
+            if ((directionRand > (randBase * 1)) && (directionRand < (randBase * 2)))
+                direction = RMG_SOUTH;
+            if ((directionRand > (randBase * 2)) && (directionRand < (randBase * 3)))
+                direction = RMG_EAST;
+            if ((directionRand > (randBase * 3)) && (directionRand < (randBase * 4)))
+                direction = RMG_WEST;
+            if (_map.directionBias != RMG_NONE)
+                _map.directionBias = direction;
+            next_tile =_tile - _map.w;
+            if ((direction == RMG_NORTH) && (next_tile > 0) && (next_tile < _map.tileCount))
+            {
+                if (!_map.tile[next_tile].c)
+                {
+                    if ((!_map.tile[next_tile + 1].c) && (!_map.tile[next_tile - 1].c))
+                    {
+                        if ((_map.tile[next_tile - _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile - _map.w + 1].d == RMG_BASE_WALL) && (_map.tile[next_tile - _map.w - 1].d == RMG_BASE_WALL))
+                        {
+                            _map.tile[next_tile].c = true;
+                            _map.tile[next_tile].d = RMG_BASE_FLOOR;
+                            genM1_maze(_map, (next_tile));
+                        }
+                    }
+                }
+            }
+            next_tile =_tile + _map.w;
+            if ((direction == RMG_SOUTH) && (next_tile > 0) && (next_tile < _map.tileCount))
+            {
+                if (!_map.tile[next_tile].c)
+                {
+                    if ((!_map.tile[next_tile + 1].c) && (!_map.tile[next_tile - 1].c))
+                    {
+                        if ((_map.tile[next_tile + _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile + _map.w + 1].d == RMG_BASE_WALL) && (_map.tile[next_tile + _map.w - 1].d == RMG_BASE_WALL))
+                        {
+                            _map.tile[next_tile].c = true;
+                            _map.tile[next_tile].d = RMG_BASE_FLOOR;
+                            genM1_maze(_map, (next_tile));
+                        }
+                    }
+                }
+            }
+            next_tile =_tile - 1;
+            if ((direction == RMG_EAST) && (next_tile > 0) && (next_tile < _map.tileCount))
+            {
+                if (!_map.tile[next_tile].c)
+                {
+                    if ((!_map.tile[next_tile + _map.w].c) && (!_map.tile[next_tile - _map.w].c))
+                    {
+                        if ((_map.tile[next_tile - _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile - 1 + _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile - 1 - _map.w].d == RMG_BASE_WALL))
+                        {
+                            _map.tile[next_tile].c = true;
+                            _map.tile[next_tile].d = RMG_BASE_FLOOR;
+                            genM1_maze(_map, (next_tile));
+                        }
+                    }
+                }
+            }
+            next_tile =_tile + 1;
+            if ((direction == RMG_WEST) && (next_tile > 0) && (next_tile < _map.tileCount))
+            {
+                if (!_map.tile[next_tile].c)
+                {
+                    if ((!_map.tile[next_tile + _map.w].c) && (!_map.tile[next_tile - _map.w].c))
+                    {
+                        if ((_map.tile[next_tile - _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile + 1 + _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile + 1 - _map.w].d == RMG_BASE_WALL))
+                        {
+                            _map.tile[next_tile].c = true;
+                            _map.tile[next_tile].d = RMG_BASE_FLOOR;
+                            genM1_maze(_map, (next_tile));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     static void genM1_internal(sMap &_map)
     {
+        // map preparation
+        uint16_t roomShape = _map.roomShape;
+        uint16_t roomCount = 0;
         for (uint32_t i = 0; i < _map.tileCount; i++)
             _map.tile[i].d = RMG_BASE_WALL;
+        mapPerimeterWalls(_map);
+        // add rooms
+        for (uint32_t i = 0; i < _map.roomMax; i++)
+        {
+            if (roomCount < _map.roomMin)
+            {
+                uint32_t r = (rand() % (_map.roomRadiusMax - _map.roomRadiusMin)) + _map.roomRadiusMin;
+                int32_t x = (rand() % (_map.w - r - r)) + r;
+                int32_t y = (rand() % (_map.h - r - r)) + r;
+                if ((x > 1) && (x < (int32_t)(_map.w-1)) && (y > 1) && (y < (int32_t)(_map.h-1)))
+                {
+                    if (_map.roomShape == RMG_RANDOM)
+                    {
+                        roomShape = ((rand() % 100) < 50) ? RMG_CIRCLE : RMG_SQUARE;
+                    }
+                    if (roomShape == RMG_CIRCLE)
+                    {
+                        if (genCircleRoomOK(_map, x, y, r + _map.roomBorder))
+                        {
+                            genCircleRoom(_map, x, y, r);
+                            roomCount++;
+                        }
+                    }
+                    if (roomShape == RMG_SQUARE)
+                    {
+                        if (genSquareRoomOK(_map, x, y, r + _map.roomBorder))
+                        {
+                            genSquareRoom(_map, x, y, r);
+                            roomCount++;
+                        }
+                    }
+                }
+            }
+        }
+        mapInitRooms(_map);
+        // set unmodifiable tiles.
+        for (uint32_t i = 0; i < _map.h; i++)
+            for (uint32_t j = 0; j < _map.w; j++)
+                _map.tile[(i * _map.w) + j].c = ((i == 0) || (i == (_map.h-1)) || (j == 0) || (j == (_map.w-1)) || (_map.tile[(i * _map.w) + j].d != RMG_BASE_WALL));
+        // maze.
+        uint32_t randBase = 25;
+        uint32_t direction = _map.directionBias;
+        uint32_t directionRand = (direction == RMG_NONE) ? (rand() % (randBase * 4)) : (rand() % (randBase * (4 + _map.directionBiasStrength)));
+        if (directionRand < randBase)
+            direction = RMG_NORTH;
+        if ((directionRand > (randBase * 1)) && (directionRand < (randBase * 2)))
+            direction = RMG_SOUTH;
+        if ((directionRand > (randBase * 2)) && (directionRand < (randBase * 3)))
+            direction = RMG_EAST;
+        if ((directionRand > (randBase * 3)) && (directionRand < (randBase * 4)))
+            direction = RMG_WEST;
+        if (_map.directionBias != RMG_NONE)
+            _map.directionBias = direction;
+        uint32_t startX = _map.w / 2;
+        uint32_t startY = _map.h / 2;
+        if (direction == RMG_NORTH)
+            startY = 1;
+        if (direction == RMG_SOUTH)
+            startY = _map.h - 2;
+        if (direction == RMG_EAST)
+            startX = 1;
+        if (direction == RMG_WEST)
+            startX = _map.w - 2;
+        uint32_t nextTile = (startY * _map.w) + startX;
+        _map.tile[nextTile].d = RMG_BASE_FLOOR;
+        _map.tile[nextTile].c = true;
+        genM1_maze(_map, nextTile);
+        // connect rooms
+        for (uint32_t i = 0; i < _map.roomCount; i++)
+        {
+            uint16_t deltaX = abs ((_map.w / 2) - _map.room[i].x);
+            uint16_t deltaY = abs ((_map.h / 2) - _map.room[i].y);
+            direction = (deltaX > deltaY) ? ((_map.room[i].x < (_map.w / 2)) ? RMG_WEST : RMG_EAST) : ((_map.room[i].y < (_map.h / 2)) ? RMG_SOUTH : RMG_NORTH);
+            uint32_t tile = 0;
+            if (direction == RMG_NORTH)
+            {
+                tile = ((_map.room[i].y - ((_map.room[i].h+1) / 2)) * _map.w) + _map.room[i].x;
+                _map.tile[tile].d = RMG_BASE_FLOOR;
+                if (_map.tile[tile-_map.w].d == RMG_BASE_WALL)
+                {
+                    while (_map.tile[tile-_map.w].d == RMG_BASE_WALL)
+                    {
+                        tile -= _map.w;
+                        _map.tile[tile].d = RMG_BASE_FLOOR;
+                    }
+                }
+            }
+            if (direction == RMG_SOUTH)
+            {
+                tile = ((_map.room[i].y + ((_map.room[i].h+3) / 2)) * _map.w) + _map.room[i].x;
+                _map.tile[tile].d = RMG_BASE_FLOOR;
+                if (_map.tile[tile+_map.w].d == RMG_BASE_WALL)
+                {
+                    while (_map.tile[tile+_map.w].d == RMG_BASE_WALL)
+                    {
+                        tile += _map.w;
+                        _map.tile[tile].d = RMG_BASE_FLOOR;
+                    }
+                }
+            }
+            if (direction == RMG_EAST)
+            {
+                tile = ((_map.room[i].y * _map.w) + _map.room[i].x - ((_map.room[i].w+1) / 2));
+                _map.tile[tile].d = RMG_BASE_FLOOR;
+                if (_map.tile[tile-1].d == RMG_BASE_WALL)
+                {
+                    while (_map.tile[tile-1].d == RMG_BASE_WALL)
+                    {
+                        tile--;
+                        _map.tile[tile].d = RMG_BASE_FLOOR;
+                    }
+                }
+            }
+            if (direction == RMG_WEST)
+            {
+                tile = ((_map.room[i].y * _map.w) + _map.room[i].x + ((_map.room[i].w+3) / 2));
+                _map.tile[tile].d = RMG_BASE_FLOOR;
+                if (_map.tile[tile+1].d == RMG_BASE_WALL)
+                {
+                    while (_map.tile[tile+1].d == RMG_BASE_WALL)
+                    {
+                        tile++;
+                        _map.tile[tile].d = RMG_BASE_FLOOR;
+                    }
+                }
+            }
+        }
     }
 
     void genM1(sMap &_map)
@@ -53,232 +285,11 @@ namespace rmg
                     _map.seed = time(NULL);
                     srand (_map.seed);
                     genM1_internal(_map);
-                    if (mapGetFloorArea(_map) > (_map.tileCount / _map.floorAreaMin))
+                    if ((mapGetFloorArea(_map) > (_map.tileCount / _map.floorAreaMin)) && (_map.roomCount >= _map.roomMin))
                         i = _map.pass;
                 }
             }
-            mapInitRooms(_map);
-            mapConnectRooms(_map);
-            //mapRemoveAnomalies(_map);
         }
     }
 
 } // namespace rmg
-
-/*
-
-#include "map_generator_M1.hpp"
-
-bool isWallTile(sGenerationData &_data, int32_t _tile)
-{
-    if ((_tile < 0) || (_tile >= int32_t(_data.tileCount-1)))
-        return false;
-    return (_data.tile[_tile] == eTile::WALL);
-}
-
-bool map_gen_maze_check_tile(sGenerationData &_data, int32_t _tile, eDirection _directionBias)
-{
-    if ((_tile < 0) || (_tile >= int32_t(_data.tileCount-1)))
-        return false;
-    if ((_tile / _data.x) == 0 || (_tile / _data.x) == _data.y-1 || (_tile % _data.x) == 0 || (_tile % _data.x) == _data.x-1)
-        return false;
-    if (_data.tile[_tile] == eTile::FLOOR)
-        return false;
-    for (uint16_t wall_count = 1; wall_count <= _data.wallWidth; wall_count++)
-    {
-        if (_directionBias == eDirection::UP)
-        {
-            if (!isWallTile(_data, _tile-wall_count))
-                return false;
-            if (!isWallTile(_data, _tile+wall_count))
-                return false;
-            if (!isWallTile(_data, _tile-_data.x*wall_count))
-                return false;
-            if (!isWallTile(_data, _tile-_data.x-wall_count))
-                return false;
-            if (!isWallTile(_data, _tile-_data.x+wall_count))
-                return false;
-        }
-        else if (_directionBias == eDirection::DOWN)
-        {
-            if (!isWallTile(_data, _tile-wall_count))
-                return false;
-            if (!isWallTile(_data, _tile+wall_count))
-                return false;
-            if (!isWallTile(_data, _tile+_data.x*wall_count))
-                return false;
-            if (!isWallTile(_data, _tile+_data.x-wall_count))
-                return false;
-            if (!isWallTile(_data, _tile+_data.x+wall_count))
-                return false;
-        }
-        else if (_directionBias == eDirection::LEFT)
-        {
-            if (!isWallTile(_data, _tile-wall_count))
-                return false;
-            if (!isWallTile(_data, _tile-_data.x*wall_count))
-                return false;
-            if (!isWallTile(_data, _tile-_data.x-wall_count))
-                return false;
-            if (!isWallTile(_data, _tile+_data.x*wall_count))
-                return false;
-            if (!isWallTile(_data, _tile+_data.x-wall_count))
-                return false;
-        }
-        else if (_directionBias == eDirection::RIGHT)
-        {
-            if (!isWallTile(_data, _tile+wall_count))
-                return false;
-            if (!isWallTile(_data, _tile-_data.x*wall_count))
-                return false;
-            if (!isWallTile(_data, _tile-_data.x+wall_count))
-                return false;
-            if (!isWallTile(_data, _tile+_data.x*wall_count))
-                return false;
-            if (!isWallTile(_data, _tile+_data.x+wall_count))
-                return false;
-        }
-    }
-    return true;
-}
-
-void map_gen_maze(sGenerationData &_data, uint32_t _tile, eDirection _directionBias)
-{
-    _data.tile[_tile] = eTile::FLOOR;
-    uint32_t tiles_available = 1;
-    eDirection tileDirection = eDirection::NONE;
-    while (tiles_available > 0)
-    {
-        tiles_available = 0;
-        uint32_t tile_up = _tile - _data.x;
-        bool tile_up_ok = map_gen_maze_check_tile(_data, tile_up, eDirection::UP);
-        if (tile_up_ok) tiles_available++;
-
-        uint32_t tile_down = _tile + _data.x;
-        bool tile_down_ok = map_gen_maze_check_tile(_data, tile_down, eDirection::DOWN);
-        if (tile_down_ok) tiles_available++;
-
-        uint32_t tile_right = _tile + 1;
-        bool tile_right_ok = map_gen_maze_check_tile(_data, tile_right, eDirection::RIGHT);
-        if (tile_right_ok) tiles_available++;
-
-        uint32_t tile_left = _tile - 1;
-        bool tile_left_ok = map_gen_maze_check_tile(_data, tile_left, eDirection::LEFT);
-        if (tile_left_ok) tiles_available++;
-
-        if (_directionBias == eDirection::NONE)
-            tileDirection = (eDirection)((_data.rmg_rand() % 4) + 1);
-        else
-        {
-            if (((_data.rmg_rand() % (4 + _data.directionBias_Threshold)) + 1) > 4)
-                tileDirection = _directionBias;
-            else
-                tileDirection = (eDirection)((_data.rmg_rand() % 4) + 1);
-        }
-        if (tileDirection == eDirection::UP)
-        {
-            if (tile_up_ok)
-            {
-                tiles_available--;
-                tile_up_ok = false;
-                map_gen_maze(_data, tile_up, _directionBias);
-            }
-        }
-        else if (tileDirection == eDirection::DOWN)
-        {
-            if (tile_down_ok)
-            {
-                tiles_available--;
-                tile_down_ok = false;
-                map_gen_maze(_data, tile_down, _directionBias);
-            }
-        }
-        else if (tileDirection == eDirection::RIGHT)
-        {
-            if (tile_right_ok)
-            {
-                tiles_available--;
-                tile_right_ok = false;
-                map_gen_maze(_data, tile_right, _directionBias);
-            }
-        }
-        else if (tileDirection == eDirection::LEFT)
-        {
-            if (tile_left_ok)
-            {
-                tiles_available--;
-                tile_left_ok = false;
-                map_gen_maze(_data, tile_left, _directionBias);
-            }
-        }
-        else
-            tiles_available--;
-    }
-}
-
-bool add_room(sGenerationData &_data, sRoom &_room)
-{
-    _room.x = _data.roomMax_x + _data.rmg_rand() % (_data.x - (_data.roomMax_x * 2));
-    _room.y = _data.roomMax_y + _data.rmg_rand() % (_data.y - (_data.roomMax_y * 2));
-    _room.w = _data.roomMin_x + _data.rmg_rand() % (_data.roomMax_x - _data.roomMin_x);
-    _room.h = _data.roomMin_y + _data.rmg_rand() % (_data.roomMax_y - _data.roomMin_y);
-    for (uint16_t i = _room.y-1-(uint16_t)_room.h/2.0f; i < _room.y+1+(uint16_t)_room.h/2.0f; i++)
-    {
-        for (uint16_t j = _room.x-1-(uint16_t)_room.w/2.0f; j < _room.x+1+(uint16_t)_room.w/2.0f; j++)
-        {
-            if (_data.tile[(i * _data.x) + j] == eTile::FLOOR)
-                return false;
-        }
-    }
-    for (uint16_t i = _room.y-(uint16_t)_room.h/2.0f; i < _room.y+(uint16_t)_room.h/2.0f; i++)
-    {
-        for (uint16_t j = _room.x-(uint16_t)_room.w/2.0f; j < _room.x+(uint16_t)_room.w/2.0f; j++)
-        {
-            _data.tile[(i * _data.x) + j] = eTile::FLOOR;
-        }
-    }
-    return true;
-}
-
-bool connect_room(sGenerationData &_data, sRoom &_room)
-{
-    eAxis directionAxis = (abs(_room.x - _data.x) > abs(_room.y - _data.y)) ? eAxis::X : eAxis::Y;
-    eDirection directionBias = (directionAxis == eAxis::X) ? ((_room.x > _data.x/2) ? eDirection::RIGHT : eDirection::LEFT) : ((_room.y > _data.y/2) ? eDirection::DOWN : eDirection::UP);
-    bool foundWall = false;
-    bool pathFound = false;
-    uint32_t pathPos = (_room.y * _data.x) + _room.x;
-    uint16_t pathMax = (directionAxis == eAxis::X) ? (abs(_data.x - _room.x) - 1) : (abs(_data.y - _room.y) - 1);
-    for (uint16_t i = 0; i < pathMax; i++)
-    {
-        if (!pathFound)
-        {
-            if ((!foundWall)&&(_data.tile[pathPos] == eTile::WALL))
-                foundWall = true;
-            if ((foundWall)&&(_data.tile[pathPos] == eTile::FLOOR))
-                pathFound = true;
-            if ((foundWall)&&(_data.tile[pathPos] == eTile::WALL))
-                _data.tile[pathPos] = eTile::FLOOR;
-            pathPos = (directionAxis == eAxis::X) ? ((directionBias == eDirection::RIGHT) ? pathPos-1 : pathPos+1) : ((directionBias == eDirection::DOWN) ? pathPos-_data.x : pathPos+_data.x);
-        }
-    }
-    return true;
-}
-
-void mapGenerator_M1(sGenerationData &_data)
-{
-    _data.tileCount = _data.x * _data.y;
-    _data.tile = new eTile[_data.tileCount];
-    for (uint32_t i = 0; i < _data.tileCount; i++)
-        _data.tile[i] = eTile::WALL;
-    uint16_t no_of_rooms = 2+ _data.rmg_rand() % 4;
-    sRoom *room = new sRoom[no_of_rooms];
-    for (uint16_t i = 0; i < no_of_rooms; i++)
-        while (!add_room(_data, room[i]));
-    map_gen_maze(_data, ((_data.x/2) + (_data.y/2*_data.x)), _data.directionBias);
-    for (uint16_t i = 0; i < no_of_rooms; i++)
-        connect_room(_data, room[i]);
-
-    delete[] room;
-
-}
-*/

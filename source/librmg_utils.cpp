@@ -78,6 +78,21 @@ namespace rmg
         }
     }
 
+    void mapDrawC(sMap &_map)
+    {
+        if (_map.tile != nullptr)
+        {
+            for (uint32_t i = 0; i < _map.h; i++)
+            {
+                for (uint32_t j = 0; j < _map.w; j++)
+                {
+                    std::cout << ((_map.tile[(i * _map.w) + j].c) ? "c" : " ");
+                }
+                std::cout << std::endl;
+            }
+        }
+    }
+
     uint32_t mapGetFloorMin(sMap &_map)
     {
         if (_map.tile == nullptr)

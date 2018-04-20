@@ -64,8 +64,17 @@ namespace rmg
             case RMG_GEN_D1:
                 genD1(_map);
             break;
+            case RMG_GEN_D2:
+                genD2(_map);
+            break;
+            case RMG_GEN_M1:
+                genM1(_map);
+            break;
             case RMG_GEN_T1:
                 genT1(_map);
+            break;
+            default:
+                std::cout << "Unknown generation algorithm: " << _map.generationAlgorithm << std::endl;;
             break;
         }
     }

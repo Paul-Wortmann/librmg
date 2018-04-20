@@ -171,6 +171,7 @@ namespace rmg
 
     struct sMap
     {
+        std::string prefabPath = "data/prefabs";
         sTile *tile = nullptr;
         sRoom *room = nullptr;
         uint32_t w = 100;
@@ -179,6 +180,8 @@ namespace rmg
         uint64_t seed = 0; // seed, 0 for random seed
         uint16_t pass = 4; // general number of passes, smoothing etc...
         uint16_t density = 10; // percentage / 2, rough approximate
+        uint16_t roomMin = 3; // Guaranteed minimum number of rooms, maps with less are discarded (sMap.pass times)
+        uint16_t roomMax = density * pass; // Will try generate up to roomMax rooms, on a tiny map reaching this is impossible
         uint16_t roomCount = 0;
         uint16_t roomRadiusMax = 9; // max room radius
         uint16_t roomRadiusMin = 5; // min room radius
@@ -189,6 +192,8 @@ namespace rmg
         uint16_t connectivityAlgorithm = RMG_PATH_SL;
         uint16_t connectivityComplexity = 50; // percentage, rand % connect neighbors
         uint16_t connectivityPadding = 0; // Tiles to pad on each side of generated paths, roomBorder should be taken into consideration!
+        uint16_t directionBias = RMG_NONE; // Favored direction
+        uint16_t directionBiasStrength = 2; // Favored direction strength
     };
 
     // --- librmg.cpp ---
@@ -208,6 +213,7 @@ namespace rmg
 
     // --- librmg_utils.cpp ---
     void mapDraw(sMap &_map);
+    void mapDrawC(sMap &_map);
     uint32_t mapGetFloorMin(sMap &_map);
     uint32_t mapGetFloorMax(sMap &_map);
     void mapPerimeterWalls(sMap &_map);
@@ -244,7 +250,7 @@ namespace rmg
     bool pathAS(sMap &_map, sPath &_path);
 
     // --- librmg_prefab.cpp ---
-    bool prefabFind(sPrefabData &_prefabData);
+    bool prefabFind(sMap &_map, sPrefabData &_prefabData);
 
 } // namespace rmg
 
