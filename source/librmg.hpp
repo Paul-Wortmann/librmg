@@ -184,7 +184,7 @@ namespace rmg
         uint16_t roomMax = density * pass; // Will try generate up to roomMax rooms, on a tiny map reaching this is impossible
         uint16_t roomCount = 0;
         uint16_t roomRadiusMax = 9; // max room radius
-        uint16_t roomRadiusMin = 5; // min room radius
+        uint16_t roomRadiusMin = 7; // min room radius
         uint16_t roomBorder = 4;
         uint16_t roomShape = RMG_SQUARE;
         uint16_t floorAreaMin = 60; // percentage, min % floor area

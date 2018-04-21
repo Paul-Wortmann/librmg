@@ -28,9 +28,6 @@ namespace rmg
 
     void splitRoom(sMap &_map, const uint16_t _roomID)
     {
-            _map.room[_roomID].p = false;
-            return;
-
         bool splitX = (_map.room[_roomID].w > ((_map.roomRadiusMin + _map.roomBorder) * 2));
         bool splitY = (_map.room[_roomID].h > ((_map.roomRadiusMin + _map.roomBorder) * 2));
         if (!splitX && !splitY)
@@ -87,12 +84,13 @@ namespace rmg
                 (_map.room[_roomID].w > _map.room[_roomID].h) ? (splitY = !splitY) : (splitX = !splitX);
             if (splitX)
             {
+                _map.room[newRoomID].p = true;
                 _map.room[newRoomID].y = _map.room[_roomID].y;
                 _map.room[newRoomID].h = _map.room[_roomID].h;
                 _map.room[newRoomID].posYMin = _map.room[_roomID].posYMin;
                 _map.room[newRoomID].posYMax = _map.room[_roomID].posYMax;
-                uint32_t splitMaxX = _map.room[_roomID].w - ((_map.roomRadiusMin + _map.roomBorder) * 2);
-                uint32_t splitDeltaX = rand() % splitMaxX;
+                uint16_t splitMaxX = _map.room[_roomID].w - ((_map.roomRadiusMin + _map.roomBorder) * 2);
+                uint16_t splitDeltaX = rand() % splitMaxX;
                 _map.room[_roomID].w = _map.roomRadiusMin + _map.roomBorder + (splitMaxX - splitDeltaX);
                 _map.room[newRoomID].w = _map.roomRadiusMin + _map.roomBorder + splitDeltaX;
                 _map.room[_roomID].x = _map.room[_roomID].posXMin + (_map.room[_roomID].w / 2);
@@ -100,13 +98,26 @@ namespace rmg
                 _map.room[newRoomID].posXMin = _map.room[_roomID].posXMin + _map.room[_roomID].w;
                 _map.room[newRoomID].posXMax = _map.room[_roomID].posXMax;
                 _map.room[_roomID].posXMax = _map.room[_roomID].posXMin + _map.room[_roomID].w - 1;
-
             }
             if (splitY)
             {
-
+                _map.room[newRoomID].p = true;
+                _map.room[newRoomID].x = _map.room[_roomID].x;
+                _map.room[newRoomID].w = _map.room[_roomID].w;
+                _map.room[newRoomID].posXMin = _map.room[_roomID].posXMin;
+                _map.room[newRoomID].posXMax = _map.room[_roomID].posXMax;
+                uint16_t splitMaxY = _map.room[_roomID].h - ((_map.roomRadiusMin + _map.roomBorder) * 2);
+                uint16_t splitDeltaY = rand() % splitMaxY;
+                _map.room[_roomID].h = _map.roomRadiusMin + _map.roomBorder + (splitMaxY - splitDeltaY);
+                _map.room[newRoomID].h = _map.roomRadiusMin + _map.roomBorder + splitDeltaY;
+                _map.room[_roomID].y = _map.room[_roomID].posYMin + (_map.room[_roomID].h / 2);
+                _map.room[newRoomID].y = _map.room[_roomID].posYMax - (_map.room[newRoomID].h / 2);
+                _map.room[newRoomID].posYMin = _map.room[_roomID].posYMin + _map.room[_roomID].h;
+                _map.room[newRoomID].posYMax = _map.room[_roomID].posYMax;
+                _map.room[_roomID].posYMax = _map.room[_roomID].posYMin + _map.room[_roomID].h - 1;
             }
-            delete tRoom;
+            if (tRoom != nullptr)
+                delete tRoom;
         }
     }
 
@@ -132,6 +143,16 @@ namespace rmg
 
     void fillRooms(sMap &_map)
     {
+        for (uint32_t k = 0; k < _map.roomCount; k++)
+        {
+            for (uint32_t i = _map.room[k].posYMin; i < _map.room[k].posYMax; i++)
+            {
+                for (uint32_t j = _map.room[k].posXMin; j < _map.room[k].posXMax; j++)
+                {
+                    _map.tile[(i * _map.w) + j].d = RMG_BASE_FLOOR;
+                }
+            }
+        }
     }
 
     static void genD2_internal(sMap &_map)
@@ -145,13 +166,12 @@ namespace rmg
         _map.room[0].p = true;
         _map.room[0].x = (_map.w-2) / 2;
         _map.room[0].y = (_map.h-2) / 2;
-        _map.room[0].w = (_map.w-2);
-        _map.room[0].h = (_map.h-2);
+        _map.room[0].w = (_map.w-1);
+        _map.room[0].h = (_map.h-1);
         _map.room[0].posXMin = 1;
         _map.room[0].posXMax = _map.room[0].w;
         _map.room[0].posYMin = 1;
         _map.room[0].posYMax = _map.room[0].h;
-
         subdivideMap(_map);
         fillRooms(_map);
     }
@@ -188,165 +208,3 @@ namespace rmg
     }
 
 } // namespace rmg
-
-/*
-
-#include "map_generator_D1.hpp"
-
-uint16_t mapGenerator_D1_build_subrooms(sRoomGenData *_room, sGenerationData &_data)
-{
-    if ((_room->ex > _data.x) || (_room->ey > _data.y))
-    {
-        _data.error = eError::ALGORITHM;
-        return 0;
-    }
-    uint16_t room_count = 0;
-    uint16_t size_x = _room->ex - _room->sx;
-    uint16_t size_y = _room->ey - _room->sy;
-    bool split_x = (size_x > ((_data.roomMax_x * 2.125f) + _data.wallWidth));
-    bool split_y = (size_y > ((_data.roomMax_y * 2.125f) + _data.wallWidth));
-    if ((split_x) && (split_y))
-        ((_data.rmg_rand() % 100) > 50) ? split_x = false : split_y = false;
-    if (split_x)
-    {
-        uint16_t split_pos = (_data.rmg_rand() % (size_x - (_data.roomMin_x * 2))) + _data.roomMin_x;
-        if (_data.error == eError::NONE)
-        {
-            _room->left = new sRoomGenData;
-            _room->left->sx = _room->sx;
-            _room->left->ex = _room->left->sx+split_pos;
-            _room->left->sy = _room->sy;
-            _room->left->ey = _room->ey;
-            _room->left->parent = _room;
-            _room->left->direction = eDirection::LEFT;
-            room_count += mapGenerator_D1_build_subrooms(_room->left, _data);
-        }
-        if (_data.error == eError::NONE)
-        {
-            _room->right = new sRoomGenData;
-            _room->right->sx = _room->left->sx+split_pos;
-            _room->right->ex = _room->ex;
-            _room->right->sy = _room->sy;
-            _room->right->ey = _room->ey;
-            _room->right->parent = _room;
-            _room->right->direction = eDirection::RIGHT;
-            room_count += mapGenerator_D1_build_subrooms(_room->right, _data);
-        }
-    }
-    if (split_y)
-    {
-        uint16_t split_pos = (_data.rmg_rand() % (size_y - (_data.roomMin_y * 2))) + _data.roomMin_y;
-        if (_data.error == eError::NONE)
-        {
-            _room->left = new sRoomGenData;
-            _room->left->sx = _room->sx;
-            _room->left->ex = _room->ex;
-            _room->left->sy = _room->sy;
-            _room->left->ey = _room->left->sy+split_pos;
-            _room->left->parent = _room;
-            _room->left->direction = eDirection::LEFT;
-            room_count += mapGenerator_D1_build_subrooms(_room->left, _data);
-        }
-        if (_data.error == eError::NONE)
-        {
-            _room->right = new sRoomGenData;
-            _room->right->sx = _room->sx;
-            _room->right->ex = _room->ex;
-            _room->right->sy = _room->left->sy+split_pos;
-            _room->right->ey = _room->ey;
-            _room->right->parent = _room;
-            _room->right->direction = eDirection::RIGHT;
-            room_count += mapGenerator_D1_build_subrooms(_room->right, _data);
-        }
-    }
-    if ((!split_x) && (!split_y))
-    {
-        _room->end_node = true;
-        room_count += 1;
-    }
-    return room_count;
-}
-
-void mapGenerator_D1_genRooms(sRoomGenData *_room, sGenerationData &_data)
-{
-    uint16_t room_ID = 0;
-    bool done = false;
-    _data.room = new sRoomData[_data.roomCount];
-    sRoomGenData *tempRoom = _room;
-     while (!done)
-     {
-        if ((tempRoom->parent == nullptr) && (tempRoom->left == nullptr) && (tempRoom->right == nullptr))
-            done = true;
-        if (tempRoom->left != nullptr)
-            tempRoom = tempRoom->left;
-        else if (tempRoom->right != nullptr)
-            tempRoom = tempRoom->right;
-        if ((tempRoom->left == nullptr) && (tempRoom->right == nullptr))
-        {
-            if(tempRoom->end_node)
-            {
-                _data.room[room_ID].valid = true;
-                _data.room[room_ID].w = tempRoom->ex - tempRoom->sx;
-                _data.room[room_ID].h = tempRoom->ey - tempRoom->sy;
-                uint16_t x = tempRoom->sx + (_data.room[room_ID].w/2);
-                uint16_t y = tempRoom->sy + (_data.room[room_ID].h/2);
-                _data.room[room_ID].position = (y * _data.x) + x;
-                room_ID++;
-            }
-            if (tempRoom->parent != nullptr)
-            {
-                eDirection direction = tempRoom->direction;
-                tempRoom = tempRoom->parent;
-                if (direction == eDirection::LEFT)
-                {
-                    delete tempRoom->left;
-                    tempRoom->left = nullptr;
-                }
-                if (direction == eDirection::RIGHT)
-                {
-                    delete tempRoom->right;
-                    tempRoom->right = nullptr;
-                }
-            }
-        }
-     }
-}
-
-void mapGenerator_D1_genRoomTileData(sGenerationData &_data)
-{
-    for (uint16_t i = 0; i < _data.roomCount; i++)
-    {
-        uint16_t sx = (_data.room[i].position % _data.x) - (_data.room[i].w / 2) +1;
-        uint16_t ex = sx + _data.room[i].w -1;
-        uint16_t sy = (_data.room[i].position / _data.x) - (_data.room[i].h / 2) +1;
-        uint16_t ey = sy + _data.room[i].h -1;
-        for (uint16_t j = sx; j < ex; j++)
-        {
-            for (uint16_t k = sy; k < ey; k++)
-            {
-                _data.tile[(k * _data.x) + j] = eTile::FLOOR;
-            }
-        }
-    }
-}
-
-void mapGenerator_D1(sGenerationData &_data)
-{
-    _data.exitCount = 0;
-    _data.tileCount = _data.x * _data.y;
-    _data.tile = new eTile[_data.tileCount];
-    for (uint16_t i = 0; i < _data.tileCount; i++)
-        _data.tile[i] = eTile::WALL;
-    sRoomGenData *room = new sRoomGenData;
-    room->sx = 0;
-    room->ex = _data.x-1;
-    room->sy = 0;
-    room->ey = _data.y-1;
-    room->end_node = false;
-    _data.roomCount = mapGenerator_D1_build_subrooms(room, _data);
-    mapGenerator_D1_genRooms(room, _data);
-    delete room;
-    mapGenerator_D1_genRoomTileData(_data);
-    mapGenerator_connectRooms_direct(_data);
-}
-*/
