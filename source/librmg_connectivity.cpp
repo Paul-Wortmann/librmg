@@ -43,7 +43,7 @@ namespace rmg
                 for (uint16_t k = _map.room[i].x; k < _map.w; k++)
                 {
                     uint16_t r = _map.tile[(j * _map.w) + k].r;
-                    if ((_map.tile[(j * _map.w) + k].d == RMG_BASE_FLOOR) && (r != i))
+                    if ((_map.tile[(j * _map.w) + k].b == RMG_BASE_FLOOR) && (r != i))
                     {
                         distanceT = sqrt(((_map.room[r].x - _map.room[i].x) * (_map.room[r].x - _map.room[i].x)) + ((_map.room[r].y - _map.room[i].y) * (_map.room[r].y - _map.room[i].y)));
                         if (distanceT < distanceW)
@@ -58,7 +58,7 @@ namespace rmg
                 for (uint16_t k = _map.room[i].x; k > 0; k--)
                 {
                     uint16_t r = _map.tile[(j * _map.w) + k].r;
-                    if ((_map.tile[(j * _map.w) + k].d == RMG_BASE_FLOOR) && (r != i))
+                    if ((_map.tile[(j * _map.w) + k].b == RMG_BASE_FLOOR) && (r != i))
                     {
                         distanceT = sqrt(((_map.room[r].x - _map.room[i].x) * (_map.room[r].x - _map.room[i].x)) + ((_map.room[r].y - _map.room[i].y) * (_map.room[r].y - _map.room[i].y)));
                         if (distanceT < distanceE)
@@ -76,7 +76,7 @@ namespace rmg
                 // down / south
                 for (uint16_t j = _map.room[i].y; j < _map.h; j++)
                 {
-                    if ((_map.tile[(j * _map.w) + k].d == RMG_BASE_FLOOR) && (_map.tile[(j * _map.w) + k].r != i))
+                    if ((_map.tile[(j * _map.w) + k].b == RMG_BASE_FLOOR) && (_map.tile[(j * _map.w) + k].r != i))
                     {
                         distanceT = sqrt(((_map.room[j].x - _map.room[i].x) * (_map.room[j].x - _map.room[i].x)) + ((_map.room[j].y - _map.room[i].y) * (_map.room[j].y - _map.room[i].y)));
                         if (distanceT < distanceS)
@@ -90,7 +90,7 @@ namespace rmg
                 // up / north
                 for (uint16_t j = _map.room[i].y; j > 0; j--)
                 {
-                    if ((_map.tile[(j * _map.w) + k].d == RMG_BASE_FLOOR) && (_map.tile[(j * _map.w) + k].r != i))
+                    if ((_map.tile[(j * _map.w) + k].b == RMG_BASE_FLOOR) && (_map.tile[(j * _map.w) + k].r != i))
                     {
                         distanceT = sqrt(((_map.room[j].x - _map.room[i].x) * (_map.room[j].x - _map.room[i].x)) + ((_map.room[j].y - _map.room[i].y) * (_map.room[j].y - _map.room[i].y)));
                         if (distanceT < distanceN)
@@ -287,57 +287,57 @@ namespace rmg
         //std::cout << "X2: " << pex  << " Y2: " << pey << std::endl;
         if (direction == RMG_EAST)
         {
-            while ((_map.tile[(psy * _map.w) + psx].d == RMG_BASE_WALL) && (psx < _map.room[_r1].posXMax))
+            while ((_map.tile[(psy * _map.w) + psx].b == RMG_BASE_WALL) && (psx < _map.room[_r1].posXMax))
                 psx++;
-            while ((_map.tile[(pey * _map.w) + pex].d == RMG_BASE_WALL) && (pex > _map.room[_r2].posXMin))
+            while ((_map.tile[(pey * _map.w) + pex].b == RMG_BASE_WALL) && (pex > _map.room[_r2].posXMin))
                 pex--;
         }
         if (direction == RMG_WEST)
         {
-            while ((_map.tile[(psy * _map.w) + psx].d == RMG_BASE_WALL) && (psx > _map.room[_r1].posXMin))
+            while ((_map.tile[(psy * _map.w) + psx].b == RMG_BASE_WALL) && (psx > _map.room[_r1].posXMin))
                 psx--;
-            while ((_map.tile[(pey * _map.w) + pex].d == RMG_BASE_WALL) && (pex < _map.room[_r2].posXMax))
+            while ((_map.tile[(pey * _map.w) + pex].b == RMG_BASE_WALL) && (pex < _map.room[_r2].posXMax))
                 pex++;
         }
         if (direction == RMG_NORTH)
         {
-            while ((_map.tile[(psy * _map.w) + psx].d == RMG_BASE_WALL) && (psy < _map.room[_r1].posYMax))
+            while ((_map.tile[(psy * _map.w) + psx].b == RMG_BASE_WALL) && (psy < _map.room[_r1].posYMax))
                 psy++;
-            while ((_map.tile[(pey * _map.w) + pex].d == RMG_BASE_WALL) && (pey > _map.room[_r2].posYMin))
+            while ((_map.tile[(pey * _map.w) + pex].b == RMG_BASE_WALL) && (pey > _map.room[_r2].posYMin))
                 pey--;
         }
         if (direction == RMG_SOUTH)
         {
-            while ((_map.tile[(psy * _map.w) + psx].d == RMG_BASE_WALL) && (psy > _map.room[_r1].posYMin))
+            while ((_map.tile[(psy * _map.w) + psx].b == RMG_BASE_WALL) && (psy > _map.room[_r1].posYMin))
                 psy--;
-            while ((_map.tile[(pey * _map.w) + pex].d == RMG_BASE_WALL) && (pey < _map.room[_r2].posYMax))
+            while ((_map.tile[(pey * _map.w) + pex].b == RMG_BASE_WALL) && (pey < _map.room[_r2].posYMax))
                 pey++;
         }
         while ((psx != pex) || (psy != pey))
         {
-            if (_map.tile[(psy * _map.w) + psx].d == RMG_BASE_WALL)
+            if (_map.tile[(psy * _map.w) + psx].b == RMG_BASE_WALL)
             {
-                _map.tile[(psy * _map.w) + psx].d = RMG_BASE_FLOOR;
+                _map.tile[(psy * _map.w) + psx].b = RMG_BASE_FLOOR;
                 if (_map.connectivityPadding > 0)
                 {
                     for (uint16_t i = 0; i <= _map.connectivityPadding; i++)
                     {
-                        if (_map.tile[(psy * _map.w) + psx + i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx + _map.w].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + _map.w].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - _map.w].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - _map.w].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx + _map.w + i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + _map.w + i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx + _map.w - i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + _map.w - i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - _map.w + i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - _map.w + i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - _map.w - i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - _map.w - i].d = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w + i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w + i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w - i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w - i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w + i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w + i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w - i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w - i].b = RMG_BASE_FLOOR;
                     }
                 }
             }
@@ -356,29 +356,29 @@ namespace rmg
 
         while (psy != pey)
         {
-            if (_map.tile[(psy * _map.w) + psx].d == RMG_BASE_WALL)
+            if (_map.tile[(psy * _map.w) + psx].b == RMG_BASE_WALL)
             {
-                _map.tile[(psy * _map.w) + psx].d = RMG_BASE_FLOOR;
+                _map.tile[(psy * _map.w) + psx].b = RMG_BASE_FLOOR;
                 if (_map.connectivityPadding > 0)
                 {
                     for (uint16_t i = 0; i <= _map.connectivityPadding; i++)
                     {
-                        if (_map.tile[(psy * _map.w) + psx + i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx + _map.w].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + _map.w].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - _map.w].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - _map.w].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx + _map.w + i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + _map.w + i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx + _map.w - i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + _map.w - i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - _map.w + i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - _map.w + i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - _map.w - i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - _map.w - i].d = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w + i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w + i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w - i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w - i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w + i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w + i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w - i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w - i].b = RMG_BASE_FLOOR;
                     }
                 }
             }
@@ -386,29 +386,29 @@ namespace rmg
         }
         while (psx != pex)
         {
-            if (_map.tile[(psy * _map.w) + psx].d == RMG_BASE_WALL)
+            if (_map.tile[(psy * _map.w) + psx].b == RMG_BASE_WALL)
             {
-                _map.tile[(psy * _map.w) + psx].d = RMG_BASE_FLOOR;
+                _map.tile[(psy * _map.w) + psx].b = RMG_BASE_FLOOR;
                 if (_map.connectivityPadding > 0)
                 {
                     for (uint16_t i = 0; i <= _map.connectivityPadding; i++)
                     {
-                        if (_map.tile[(psy * _map.w) + psx + i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx + _map.w].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + _map.w].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - _map.w].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - _map.w].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx + _map.w + i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + _map.w + i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx + _map.w - i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx + _map.w - i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - _map.w + i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - _map.w + i].d = RMG_BASE_FLOOR;
-                        if (_map.tile[(psy * _map.w) + psx - _map.w - i].d == RMG_BASE_WALL)
-                            _map.tile[(psy * _map.w) + psx - _map.w - i].d = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w + i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w + i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx + _map.w - i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx + _map.w - i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w + i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w + i].b = RMG_BASE_FLOOR;
+                        if (_map.tile[(psy * _map.w) + psx - _map.w - i].b == RMG_BASE_WALL)
+                            _map.tile[(psy * _map.w) + psx - _map.w - i].b = RMG_BASE_FLOOR;
                     }
                 }
             }

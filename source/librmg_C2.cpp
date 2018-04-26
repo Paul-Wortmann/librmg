@@ -30,7 +30,7 @@ namespace rmg
     {
         uint32_t blobCount = _map.density / _map.pass;
         for (uint32_t i = 0; i < _map.tileCount; i++)
-            _map.tile[i].d = RMG_BASE_WALL;
+            _map.tile[i].b = RMG_BASE_WALL;
         mapPerimeterWalls(_map);
         for (uint32_t i = 0; i < blobCount; i++)
         {

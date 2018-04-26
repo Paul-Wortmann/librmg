@@ -29,11 +29,11 @@ namespace rmg
     static void genC1_internal(sMap &_map)
     {
         for (uint32_t i = 0; i < _map.tileCount; i++)
-            _map.tile[i].d = RMG_BASE_FLOOR;
+            _map.tile[i].b = RMG_BASE_FLOOR;
         mapPerimeterWalls(_map);
         uint32_t walls = (_map.tileCount / 100) * _map.density;
         for (uint16_t i = 0; i < walls; i++)
-            _map.tile[rand() % _map.tileCount].d = RMG_BASE_WALL;
+            _map.tile[rand() % _map.tileCount].b = RMG_BASE_WALL;
         for (uint16_t p = 0; p < _map.pass; p++)
         {
             for (uint32_t i = 1; i < _map.h-1; i++)
@@ -41,28 +41,28 @@ namespace rmg
                 for (uint32_t j = 1; j < _map.w-1; j++)
                 {
                     uint16_t tCount = 0;
-                    if (_map.tile[(i * _map.w) + j].d == RMG_BASE_WALL)
+                    if (_map.tile[(i * _map.w) + j].b == RMG_BASE_WALL)
                         tCount++;
-                    if (_map.tile[(i * _map.w) + j + 1].d == RMG_BASE_WALL)
+                    if (_map.tile[(i * _map.w) + j + 1].b == RMG_BASE_WALL)
                         tCount++;
-                    if (_map.tile[(i * _map.w) + j - 1].d == RMG_BASE_WALL)
+                    if (_map.tile[(i * _map.w) + j - 1].b == RMG_BASE_WALL)
                         tCount++;
-                    if (_map.tile[(i * _map.w) + j + _map.w].d == RMG_BASE_WALL)
+                    if (_map.tile[(i * _map.w) + j + _map.w].b == RMG_BASE_WALL)
                         tCount++;
-                    if (_map.tile[(i * _map.w) + j + _map.w + 1].d == RMG_BASE_WALL)
+                    if (_map.tile[(i * _map.w) + j + _map.w + 1].b == RMG_BASE_WALL)
                         tCount++;
-                    if (_map.tile[(i * _map.w) + j + _map.w - 1].d == RMG_BASE_WALL)
+                    if (_map.tile[(i * _map.w) + j + _map.w - 1].b == RMG_BASE_WALL)
                         tCount++;
-                    if (_map.tile[(i * _map.w) + j - _map.w].d == RMG_BASE_WALL)
+                    if (_map.tile[(i * _map.w) + j - _map.w].b == RMG_BASE_WALL)
                         tCount++;
-                    if (_map.tile[(i * _map.w) + j - _map.w + 1].d == RMG_BASE_WALL)
+                    if (_map.tile[(i * _map.w) + j - _map.w + 1].b == RMG_BASE_WALL)
                         tCount++;
-                    if (_map.tile[(i * _map.w) + j - _map.w - 1].d == RMG_BASE_WALL)
+                    if (_map.tile[(i * _map.w) + j - _map.w - 1].b == RMG_BASE_WALL)
                         tCount++;
                     if (tCount >= 5)
-                        _map.tile[(i * _map.w) + j].d = RMG_BASE_WALL;
+                        _map.tile[(i * _map.w) + j].b = RMG_BASE_WALL;
                     else
-                        _map.tile[(i * _map.w) + j].d = RMG_BASE_FLOOR;
+                        _map.tile[(i * _map.w) + j].b = RMG_BASE_FLOOR;
                 }
             }
         }

@@ -149,7 +149,7 @@ namespace rmg
             {
                 for (uint32_t j = _map.room[k].posXMin; j < _map.room[k].posXMax; j++)
                 {
-                    _map.tile[(i * _map.w) + j].d = RMG_BASE_FLOOR;
+                    _map.tile[(i * _map.w) + j].b = RMG_BASE_FLOOR;
                 }
             }
         }
@@ -158,7 +158,7 @@ namespace rmg
     static void genD2_internal(sMap &_map)
     {
         for (uint32_t i = 0; i < _map.tileCount; i++)
-            _map.tile[i].d = RMG_BASE_WALL;
+            _map.tile[i].b = RMG_BASE_WALL;
         if (_map.room != nullptr)
             delete _map.room;
         _map.roomCount = 1;

@@ -31,7 +31,7 @@ namespace rmg
         uint16_t roomShape = _map.roomShape;
         uint32_t roomMax = _map.density * _map.pass;
         for (uint32_t i = 0; i < _map.tileCount; i++)
-            _map.tile[i].d = RMG_BASE_WALL;
+            _map.tile[i].b = RMG_BASE_WALL;
         mapPerimeterWalls(_map);
         for (uint32_t i = 0; i < roomMax; i++)
         {

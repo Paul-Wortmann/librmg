@@ -68,10 +68,10 @@ namespace rmg
                 {
                     if ((!_map.tile[next_tile + 1].c) && (!_map.tile[next_tile - 1].c))
                     {
-                        if ((_map.tile[next_tile - _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile - _map.w + 1].d == RMG_BASE_WALL) && (_map.tile[next_tile - _map.w - 1].d == RMG_BASE_WALL))
+                        if ((_map.tile[next_tile - _map.w].b == RMG_BASE_WALL) && (_map.tile[next_tile - _map.w + 1].b == RMG_BASE_WALL) && (_map.tile[next_tile - _map.w - 1].b == RMG_BASE_WALL))
                         {
                             _map.tile[next_tile].c = true;
-                            _map.tile[next_tile].d = RMG_BASE_FLOOR;
+                            _map.tile[next_tile].b = RMG_BASE_FLOOR;
                             genM1_maze(_map, (next_tile));
                         }
                     }
@@ -84,10 +84,10 @@ namespace rmg
                 {
                     if ((!_map.tile[next_tile + 1].c) && (!_map.tile[next_tile - 1].c))
                     {
-                        if ((_map.tile[next_tile + _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile + _map.w + 1].d == RMG_BASE_WALL) && (_map.tile[next_tile + _map.w - 1].d == RMG_BASE_WALL))
+                        if ((_map.tile[next_tile + _map.w].b == RMG_BASE_WALL) && (_map.tile[next_tile + _map.w + 1].b == RMG_BASE_WALL) && (_map.tile[next_tile + _map.w - 1].b == RMG_BASE_WALL))
                         {
                             _map.tile[next_tile].c = true;
-                            _map.tile[next_tile].d = RMG_BASE_FLOOR;
+                            _map.tile[next_tile].b = RMG_BASE_FLOOR;
                             genM1_maze(_map, (next_tile));
                         }
                     }
@@ -100,10 +100,10 @@ namespace rmg
                 {
                     if ((!_map.tile[next_tile + _map.w].c) && (!_map.tile[next_tile - _map.w].c))
                     {
-                        if ((_map.tile[next_tile - _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile - 1 + _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile - 1 - _map.w].d == RMG_BASE_WALL))
+                        if ((_map.tile[next_tile - _map.w].b == RMG_BASE_WALL) && (_map.tile[next_tile - 1 + _map.w].b == RMG_BASE_WALL) && (_map.tile[next_tile - 1 - _map.w].b == RMG_BASE_WALL))
                         {
                             _map.tile[next_tile].c = true;
-                            _map.tile[next_tile].d = RMG_BASE_FLOOR;
+                            _map.tile[next_tile].b = RMG_BASE_FLOOR;
                             genM1_maze(_map, (next_tile));
                         }
                     }
@@ -116,10 +116,10 @@ namespace rmg
                 {
                     if ((!_map.tile[next_tile + _map.w].c) && (!_map.tile[next_tile - _map.w].c))
                     {
-                        if ((_map.tile[next_tile - _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile + 1 + _map.w].d == RMG_BASE_WALL) && (_map.tile[next_tile + 1 - _map.w].d == RMG_BASE_WALL))
+                        if ((_map.tile[next_tile - _map.w].b == RMG_BASE_WALL) && (_map.tile[next_tile + 1 + _map.w].b == RMG_BASE_WALL) && (_map.tile[next_tile + 1 - _map.w].b == RMG_BASE_WALL))
                         {
                             _map.tile[next_tile].c = true;
-                            _map.tile[next_tile].d = RMG_BASE_FLOOR;
+                            _map.tile[next_tile].b = RMG_BASE_FLOOR;
                             genM1_maze(_map, (next_tile));
                         }
                     }
@@ -134,7 +134,7 @@ namespace rmg
         uint16_t roomShape = _map.roomShape;
         uint16_t roomCount = 0;
         for (uint32_t i = 0; i < _map.tileCount; i++)
-            _map.tile[i].d = RMG_BASE_WALL;
+            _map.tile[i].b = RMG_BASE_WALL;
         mapPerimeterWalls(_map);
         // add rooms
         for (uint32_t i = 0; i < _map.roomMax; i++)
@@ -173,7 +173,7 @@ namespace rmg
         // set unmodifiable tiles.
         for (uint32_t i = 0; i < _map.h; i++)
             for (uint32_t j = 0; j < _map.w; j++)
-                _map.tile[(i * _map.w) + j].c = ((i == 0) || (i == (_map.h-1)) || (j == 0) || (j == (_map.w-1)) || (_map.tile[(i * _map.w) + j].d != RMG_BASE_WALL));
+                _map.tile[(i * _map.w) + j].c = ((i == 0) || (i == (_map.h-1)) || (j == 0) || (j == (_map.w-1)) || (_map.tile[(i * _map.w) + j].b != RMG_BASE_WALL));
         // maze.
         uint32_t randBase = 25;
         uint32_t direction = _map.directionBias;
@@ -199,7 +199,7 @@ namespace rmg
         if (direction == RMG_WEST)
             startX = _map.w - 2;
         uint32_t nextTile = (startY * _map.w) + startX;
-        _map.tile[nextTile].d = RMG_BASE_FLOOR;
+        _map.tile[nextTile].b = RMG_BASE_FLOOR;
         _map.tile[nextTile].c = true;
         genM1_maze(_map, nextTile);
         // connect rooms
@@ -212,52 +212,52 @@ namespace rmg
             if (direction == RMG_NORTH)
             {
                 tile = ((_map.room[i].y - ((_map.room[i].h+1) / 2)) * _map.w) + _map.room[i].x;
-                _map.tile[tile].d = RMG_BASE_FLOOR;
-                if (_map.tile[tile-_map.w].d == RMG_BASE_WALL)
+                _map.tile[tile].b = RMG_BASE_FLOOR;
+                if (_map.tile[tile-_map.w].b == RMG_BASE_WALL)
                 {
-                    while (_map.tile[tile-_map.w].d == RMG_BASE_WALL)
+                    while (_map.tile[tile-_map.w].b == RMG_BASE_WALL)
                     {
                         tile -= _map.w;
-                        _map.tile[tile].d = RMG_BASE_FLOOR;
+                        _map.tile[tile].b = RMG_BASE_FLOOR;
                     }
                 }
             }
             if (direction == RMG_SOUTH)
             {
                 tile = ((_map.room[i].y + ((_map.room[i].h+3) / 2)) * _map.w) + _map.room[i].x;
-                _map.tile[tile].d = RMG_BASE_FLOOR;
-                if (_map.tile[tile+_map.w].d == RMG_BASE_WALL)
+                _map.tile[tile].b = RMG_BASE_FLOOR;
+                if (_map.tile[tile+_map.w].b == RMG_BASE_WALL)
                 {
-                    while (_map.tile[tile+_map.w].d == RMG_BASE_WALL)
+                    while (_map.tile[tile+_map.w].b == RMG_BASE_WALL)
                     {
                         tile += _map.w;
-                        _map.tile[tile].d = RMG_BASE_FLOOR;
+                        _map.tile[tile].b = RMG_BASE_FLOOR;
                     }
                 }
             }
             if (direction == RMG_EAST)
             {
                 tile = ((_map.room[i].y * _map.w) + _map.room[i].x - ((_map.room[i].w+1) / 2));
-                _map.tile[tile].d = RMG_BASE_FLOOR;
-                if (_map.tile[tile-1].d == RMG_BASE_WALL)
+                _map.tile[tile].b = RMG_BASE_FLOOR;
+                if (_map.tile[tile-1].b == RMG_BASE_WALL)
                 {
-                    while (_map.tile[tile-1].d == RMG_BASE_WALL)
+                    while (_map.tile[tile-1].b == RMG_BASE_WALL)
                     {
                         tile--;
-                        _map.tile[tile].d = RMG_BASE_FLOOR;
+                        _map.tile[tile].b = RMG_BASE_FLOOR;
                     }
                 }
             }
             if (direction == RMG_WEST)
             {
                 tile = ((_map.room[i].y * _map.w) + _map.room[i].x + ((_map.room[i].w+3) / 2));
-                _map.tile[tile].d = RMG_BASE_FLOOR;
-                if (_map.tile[tile+1].d == RMG_BASE_WALL)
+                _map.tile[tile].b = RMG_BASE_FLOOR;
+                if (_map.tile[tile+1].b == RMG_BASE_WALL)
                 {
-                    while (_map.tile[tile+1].d == RMG_BASE_WALL)
+                    while (_map.tile[tile+1].b == RMG_BASE_WALL)
                     {
                         tile++;
-                        _map.tile[tile].d = RMG_BASE_FLOOR;
+                        _map.tile[tile].b = RMG_BASE_FLOOR;
                     }
                 }
             }

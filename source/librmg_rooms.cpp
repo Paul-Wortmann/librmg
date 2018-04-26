@@ -35,7 +35,7 @@ namespace rmg
             for (uint32_t j = 0; j < _map.w; j++)
             {
                 if ((((j - _x) * (j - _x)) + ((i - _y) * (i - _y))) < (_r * _r))
-                    if (_map.tile[(i * _map.w) + j].d == RMG_BASE_FLOOR)
+                    if (_map.tile[(i * _map.w) + j].b == RMG_BASE_FLOOR)
                         return false;
             }
         }
@@ -51,7 +51,7 @@ namespace rmg
             for (uint32_t j = 0; j < _map.w; j++)
             {
                 if ((((j - _x) * (j - _x)) + ((i - _y) * (i - _y))) < (_r * _r))
-                    _map.tile[(i * _map.w) + j].d = RMG_BASE_FLOOR;
+                    _map.tile[(i * _map.w) + j].b = RMG_BASE_FLOOR;
             }
         }
     }
@@ -76,7 +76,7 @@ namespace rmg
         {
             for (uint32_t j = rxMin; j < rxMax; j++)
             {
-                if (_map.tile[(i * _map.w) + j].d != RMG_BASE_WALL)
+                if (_map.tile[(i * _map.w) + j].b != RMG_BASE_WALL)
                     return false;
             }
         }
@@ -95,7 +95,7 @@ namespace rmg
         {
             for (uint32_t j = rxMin; j < rxMax; j++)
             {
-                    _map.tile[(i * _map.w) + j].d = RMG_BASE_FLOOR;
+                    _map.tile[(i * _map.w) + j].b = RMG_BASE_FLOOR;
             }
         }
     }
@@ -104,7 +104,7 @@ namespace rmg
     {
         if (i  < _map.tileCount)
         {
-            if ((!_map.tile[i].c) && (_map.tile[i].d == RMG_BASE_FLOOR))
+            if ((!_map.tile[i].c) && (_map.tile[i].b == RMG_BASE_FLOOR))
             {
                 _map.tile[i].c = true;
                 _map.tile[i].r = _map.roomCount;
@@ -134,7 +134,7 @@ namespace rmg
             }
             for (uint32_t i = 0; i < _map.tileCount; i++)
             {
-                if ((!_map.tile[i].c) && (_map.tile[i].d == RMG_BASE_FLOOR))
+                if ((!_map.tile[i].c) && (_map.tile[i].b == RMG_BASE_FLOOR))
                 {
                     mapFindRoom(_map, i);
                     _map.roomCount++;
@@ -155,7 +155,7 @@ namespace rmg
                 uint32_t tileCount = 0;
                 for (uint32_t j = 0; j < _map.tileCount; j++)
                 {
-                    if ((_map.tile[j].r == i) && (_map.tile[j].d == RMG_BASE_FLOOR))
+                    if ((_map.tile[j].r == i) && (_map.tile[j].b == RMG_BASE_FLOOR))
                         tileCount++;
                 }
                 if (tileCount < (uint32_t)(_map.roomRadiusMin * _map.roomRadiusMin))
@@ -166,7 +166,7 @@ namespace rmg
                         if (_map.tile[j].r == i)
                         {
                             _map.tile[j].r = 0;
-                            _map.tile[j].d = RMG_BASE_WALL;
+                            _map.tile[j].b = RMG_BASE_WALL;
                         }
                     }
                 }
@@ -189,7 +189,7 @@ namespace rmg
                 {
                     for (uint32_t k = 0; k < _map.w; k++)
                     {
-                        if ((_map.tile[(j * _map.w) + k].r == i) && (_map.tile[(j * _map.w) + k].d == RMG_BASE_FLOOR))
+                        if ((_map.tile[(j * _map.w) + k].r == i) && (_map.tile[(j * _map.w) + k].b == RMG_BASE_FLOOR))
                         {
                             if (k < _map.room[i].posXMin)
                                 _map.room[i].posXMin = k;
@@ -217,7 +217,7 @@ namespace rmg
         if (_map.tile != nullptr)
         {
             for (uint32_t i = 0; i < _map.tileCount; i++)
-                if ((_map.tile[i].r == _r) && (_map.tile[i].d == RMG_BASE_FLOOR))
+                if ((_map.tile[i].r == _r) && (_map.tile[i].b == RMG_BASE_FLOOR))
                     returnValue++;
         }
         return returnValue;
@@ -241,10 +241,10 @@ namespace rmg
             }
             for (uint32_t i = 0; i < _map.tileCount; i++)
             {
-                if ((_map.tile[i].r != roomNumber) && (_map.tile[i].d == RMG_BASE_FLOOR))
+                if ((_map.tile[i].r != roomNumber) && (_map.tile[i].b == RMG_BASE_FLOOR))
                 {
                     _map.tile[i].r = RMG_NOROOM;
-                    _map.tile[i].d = RMG_BASE_WALL;
+                    _map.tile[i].b = RMG_BASE_WALL;
                 }
                 else
                     _map.tile[i].r = 0;

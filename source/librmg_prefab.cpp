@@ -25,10 +25,94 @@
 
 namespace rmg
 {
-
-    bool prefabFind(sMap &_map, sPrefabData &_prefabData)
+    void stripSpaces(std::string &_stringIN)
     {
-        _prefabData.count = 0;;
+        std::string tempString = "";
+        uint16_t stringLength = _stringIN.length();
+        for (uint16_t i = 0; i < stringLength; i++)
+        {
+            if (_stringIN[i] != ' ')
+                tempString += _stringIN[i];
+        }
+        _stringIN = tempString;
+    }
+
+    int32_t xmlGetSingleInt(const std::string &_string)
+    {
+        bool valueStart = false;
+        bool valueEnd = false;
+        std::string value = "";
+        uint16_t stringLength = _string.length();
+        for (uint16_t i = 0; i < stringLength; i++)
+        {
+            if (_string[i] == '<')
+            {
+                if (!valueEnd && valueStart)
+                    valueEnd = true;
+            }
+            if (_string[i] == '>')
+            {
+                if (!valueEnd && !valueStart)
+                    valueStart = true;
+            }
+            if (!valueEnd && valueStart && (_string[i] != '>'))
+                value += _string[i];
+        }
+        return atol(value.c_str());
+    }
+
+    int32_t xmlGetIntValueCount(const std::string &_string)
+    {
+        uint16_t valueCount = 0;
+        uint16_t stringLength = _string.length();
+        for (uint16_t i = 0; i < stringLength; i++)
+            if (_string[i] == ',')
+                valueCount++;
+        if (valueCount > 0)
+            valueCount++;
+        return valueCount;
+    }
+
+    int32_t xmlGetIntValue(const std::string &_string, const uint16_t &_pos)
+    {
+        bool valueStart = false;
+        bool valueEnd = false;
+        uint16_t valuePos = 0;
+        std::string value = "";
+        uint16_t stringLength = _string.length();
+        for (uint16_t i = 0; i < stringLength; i++)
+        {
+            if (_string[i] == '<')
+            {
+                if (!valueEnd && valueStart)
+                    valueEnd = true;
+            }
+            if (_string[i] == '>')
+            {
+                if (!valueEnd && !valueStart)
+                    valueStart = true;
+            }
+            if (!valueEnd && valueStart && (_string[i] != '>'))
+            {
+                if (_string[i] == ',')
+                    valuePos++;
+                else
+                {
+                    if (_pos == valuePos)
+                        value += _string[i];
+                }
+            }
+        }
+        return atol(value.c_str());
+    }
+
+    void prefabFreeAll(sMap &_map)
+    {
+    }
+
+    bool prefabFind(sMap &_map)
+    {
+        _map.prefab.count = 0;
         DIR *dir;
         struct dirent *ent;
         if ((dir = opendir (_map.prefabPath.c_str())) != nullptr)
@@ -36,28 +120,158 @@ namespace rmg
             while ((ent = readdir (dir)) != nullptr)
             {
                 if (ent->d_type == DT_REG)
-                    _prefabData.count++;
-            }
-            rewinddir(dir);
-            _prefabData.filename = new std::string[_prefabData.count];
-            _prefabData.count = 0;;
-            while ((ent = readdir (dir)) != nullptr)
-            {
-                if (ent->d_type == DT_REG)
                 {
-                    _prefabData.filename[_prefabData.count] = ent->d_name;
-                    _prefabData.count++;
+                    _map.prefab.count++;
+                    prefabLoad(_map, ent->d_name);
                 }
             }
             closedir (dir);
-            std::cout << _prefabData.filename[0] << std::endl;
         }
         else
         {
             std::cout << "Error could not open directory." << std::endl;
             return EXIT_FAILURE;
         }
-        return (_prefabData.count > 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+        return (_map.prefab.count > 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+
+    void prefabLoad(sMap &_map, const std::string &_fileName)
+    {
+        // read file and parse
+        std::string fileAndPath = _map.prefabPath;
+        fileAndPath += "/";
+        fileAndPath += _fileName;
+        std::ifstream tFstream(fileAndPath.c_str(), std::ifstream::in);
+        if (tFstream.is_open())
+        {
+            uint16_t eventCount = _map.eventCount;
+            sPrefab *prefabTemp = _map.prefab.head;
+            if (_map.prefab.head == nullptr)
+            {
+                _map.prefab.head = new sPrefab;
+                prefabTemp = _map.prefab.head;
+            }
+            else
+            {
+                for (prefabTemp = _map.prefab.head; prefabTemp->next != nullptr; prefabTemp = prefabTemp->next);
+                prefabTemp->next = new sPrefab;
+                prefabTemp = prefabTemp->next;
+            }
+            prefabTemp->next = nullptr;
+            prefabTemp->filename = _fileName;
+            uint16_t currentLayer = RMG_LAYER_NONE;
+            bool eventSection = false;
+            std::string tData = "";
+            uint32_t tLength = 0;
+            uint32_t tLine = 0;
+            sEventTile *tEvent = nullptr;
+            while (tFstream.good())
+            {
+                tData = "";
+                std::getline(tFstream, tData);
+                stripSpaces(tData);
+                tLength = tData.length();
+                if (tLength > 3)
+                {
+                    if (tData.find("<width>") != std::string::npos)
+                        prefabTemp->w = xmlGetSingleInt(tData);
+                    if (tData.find("<height>") != std::string::npos)
+                        prefabTemp->h = xmlGetSingleInt(tData);
+                    if (tData.find("<layer_base>") != std::string::npos)
+                    {
+                        prefabTemp->tileCount = prefabTemp->w * prefabTemp->h;
+                        if (prefabTemp->tile == nullptr)
+                            prefabTemp->tile = new sPrefabTile[prefabTemp->tileCount];
+                        tLine = 0;
+                        currentLayer = RMG_LAYER_BASE;
+                    }
+                    if (tData.find("<layer_object>") != std::string::npos)
+                    {
+                        prefabTemp->tileCount = prefabTemp->w * prefabTemp->h;
+                        if (prefabTemp->tile == nullptr)
+                            prefabTemp->tile = new sPrefabTile[prefabTemp->tileCount];
+                        tLine = 0;
+                        currentLayer = RMG_LAYER_OBJECT;
+                    }
+                    if (tData.find("<layer_event>") != std::string::npos)
+                    {
+                        prefabTemp->tileCount = prefabTemp->w * prefabTemp->h;
+                        if (prefabTemp->tile == nullptr)
+                            prefabTemp->tile = new sPrefabTile[prefabTemp->tileCount];
+                        tLine = 0;
+                        currentLayer = RMG_LAYER_EVENT;
+                    }
+                    if (tData.find("<tiles>") != std::string::npos)
+                    {
+                        uint16_t valueCount = xmlGetIntValueCount(tData);
+                        for (uint16_t i = 0; i< valueCount; i++)
+                        {
+                            if (currentLayer == RMG_LAYER_BASE)
+                                prefabTemp->tile[(tLine * prefabTemp->w) + i].b = xmlGetIntValue(tData, i);
+                            if (currentLayer == RMG_LAYER_OBJECT)
+                                prefabTemp->tile[(tLine * prefabTemp->w) + i].o = xmlGetIntValue(tData, i);
+                            if (currentLayer == RMG_LAYER_EVENT)
+                                prefabTemp->tile[(tLine * prefabTemp->w) + i].e = xmlGetIntValue(tData, i) + eventCount;
+                        }
+                        tLine++;
+                    }
+                    if (tData.find("<event>") != std::string::npos)
+                    {
+                        currentLayer = RMG_LAYER_NONE;
+                        eventSection = true;
+                    }
+                    if (tData.find("</event>") != std::string::npos)
+                        eventSection = false;
+                    if (eventSection)
+                    {
+                        if (tData.find("<ID>") != std::string::npos)
+                        {
+                            if (_map.event == nullptr)
+                            {
+                                _map.event = new sEventTile;
+                                tEvent = _map.event;
+                            }
+                            else
+                            {
+                                for (tEvent = _map.event; tEvent->next != nullptr; tEvent = tEvent->next);
+                                tEvent->next = new sEventTile;
+                                tEvent = tEvent->next;
+                            }
+                            tEvent->next = nullptr;
+                            tEvent->ID = eventCount + xmlGetSingleInt(tData);
+                        }
+                        if (tData.find("<enabled>") != std::string::npos)
+                            tEvent->enabled = (xmlGetSingleInt(tData) == 1);
+                        if (tData.find("<type>") != std::string::npos)
+                            tEvent->type = xmlGetSingleInt(tData);
+                        if (tData.find("<state>") != std::string::npos)
+                            tEvent->state = xmlGetSingleInt(tData);
+                        if (tData.find("<reTriggerable>") != std::string::npos)
+                            tEvent->reTriggerable = (xmlGetSingleInt(tData) == 1);
+                        if (tData.find("<triggerTileID>") != std::string::npos)
+                        {
+                            tEvent->triggerTileCount = xmlGetIntValueCount(tData);
+                            for (uint16_t i = 0; i< tEvent->triggerTileCount; i++)
+                                tEvent->triggerTileID[i] = xmlGetIntValue(tData, i);
+                        }
+                        if (tData.find("<targetTileID>") != std::string::npos)
+                        {
+                            tEvent->targetTileCount = xmlGetIntValueCount(tData);
+                            for (uint16_t i = 0; i< tEvent->targetTileCount; i++)
+                                tEvent->targetTileID[i] = xmlGetIntValue(tData, i);
+                        }
+                        if (tData.find("<timer>") != std::string::npos)
+                            tEvent->timer = xmlGetSingleInt(tData);
+                    }
+                }
+            }
+            tFstream.close();
+            std::cout << "Loaded prefab: " << fileAndPath << std::endl;
+        }
+        else
+        {
+            std::cout << "Error - Failed to open file: " << fileAndPath << std::endl;
+        }
     }
 
 } // namespace rmg

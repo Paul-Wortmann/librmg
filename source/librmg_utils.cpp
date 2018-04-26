@@ -34,7 +34,7 @@ namespace rmg
             {
                 for (uint32_t j = 0; j < _map.w; j++)
                 {
-                    switch (_map.tile[(i * _map.w) + j].d)
+                    switch (_map.tile[(i * _map.w) + j].b)
                     {
                         case RMG_BASE_WALL:
                             std::cout << "#";
@@ -101,7 +101,7 @@ namespace rmg
         {
             for (uint32_t i = 0; i < _map.tileCount; i++)
             {
-                if (_map.tile[i].d == RMG_BASE_FLOOR)
+                if (_map.tile[i].b == RMG_BASE_FLOOR)
                     return i;
             }
         }
@@ -116,7 +116,7 @@ namespace rmg
         {
             for (uint32_t i = _map.tileCount-_map.w; i > 0; i--)
             {
-                if (_map.tile[i].d == RMG_BASE_FLOOR)
+                if (_map.tile[i].b == RMG_BASE_FLOOR)
                     return i;
             }
         }
@@ -134,7 +134,7 @@ namespace rmg
                 for (uint32_t j = 0; j < _map.w; j++)
                 {
                     if ((j == 0) || (j == _map.w -1) || (i == 0) || (i == _map.h -1))
-                        _map.tile[(i * _map.w) + j].d = RMG_BASE_WALL;
+                        _map.tile[(i * _map.w) + j].b = RMG_BASE_WALL;
                 }
             }
         }
@@ -149,7 +149,7 @@ namespace rmg
             uint32_t tileCount = 0;
             for (uint32_t j = 0; j < _map.tileCount; j++)
             {
-                if (_map.tile[j].d == RMG_BASE_FLOOR)
+                if (_map.tile[j].b == RMG_BASE_FLOOR)
                     tileCount++;
             }
             return tileCount;
@@ -167,18 +167,18 @@ namespace rmg
                 for (uint16_t j = 1; j < (_map.w - 1); j++)
                 {
                     tileT = (i * _map.w) + j;
-                    if (_map.tile[tileT].d == RMG_BASE_FLOOR)
+                    if (_map.tile[tileT].b == RMG_BASE_FLOOR)
                     {
                         // Remove single horizontal floor tiles
                         // ???
                         // XOX
                         // ???
                         //--------------------
-                        if ((_map.tile[tileT+1].d == RMG_BASE_WALL)
-                         && (_map.tile[tileT-1].d == RMG_BASE_WALL))
+                        if ((_map.tile[tileT+1].b == RMG_BASE_WALL)
+                         && (_map.tile[tileT-1].b == RMG_BASE_WALL))
                         {
-                            _map.tile[tileT+1].d = RMG_BASE_FLOOR;
-                            _map.tile[tileT-1].d = RMG_BASE_FLOOR;
+                            _map.tile[tileT+1].b = RMG_BASE_FLOOR;
+                            _map.tile[tileT-1].b = RMG_BASE_FLOOR;
                             _map.tile[tileT+1].r = _map.tile[tileT].r;
                             _map.tile[tileT-1].r = _map.tile[tileT].r;
                         }
@@ -187,26 +187,26 @@ namespace rmg
                         // ?O?
                         // ?X?
                         //--------------------
-                        if ((_map.tile[tileT+_map.w].d == RMG_BASE_WALL)
-                         && (_map.tile[tileT-_map.w].d == RMG_BASE_WALL))
+                        if ((_map.tile[tileT+_map.w].b == RMG_BASE_WALL)
+                         && (_map.tile[tileT-_map.w].b == RMG_BASE_WALL))
                         {
-                            _map.tile[tileT+_map.w].d = RMG_BASE_FLOOR;
-                            _map.tile[tileT-_map.w].d = RMG_BASE_FLOOR;
+                            _map.tile[tileT+_map.w].b = RMG_BASE_FLOOR;
+                            _map.tile[tileT-_map.w].b = RMG_BASE_FLOOR;
                             _map.tile[tileT+_map.w].r = _map.tile[tileT].r;
                             _map.tile[tileT-_map.w].r = _map.tile[tileT].r;
                         }
                     }
-                    else if (_map.tile[tileT].d == RMG_BASE_WALL)
+                    else if (_map.tile[tileT].b == RMG_BASE_WALL)
                     {
                         // Remove single horizontal wall tiles
                         // ???
                         // OXO
                         // ???
                         //--------------------
-                        if ((_map.tile[tileT+1].d == RMG_BASE_FLOOR)
-                         && (_map.tile[tileT-1].d == RMG_BASE_FLOOR))
+                        if ((_map.tile[tileT+1].b == RMG_BASE_FLOOR)
+                         && (_map.tile[tileT-1].b == RMG_BASE_FLOOR))
                         {
-                            _map.tile[tileT].d = RMG_BASE_FLOOR;
+                            _map.tile[tileT].b = RMG_BASE_FLOOR;
                             _map.tile[tileT].r = _map.tile[tileT+1].r;
                         }
                         // Remove single vertical wall tiles
@@ -214,10 +214,10 @@ namespace rmg
                         // ?X?
                         // ?O?
                         //--------------------
-                        if ((_map.tile[tileT+_map.w].d == RMG_BASE_FLOOR)
-                         && (_map.tile[tileT-_map.w].d == RMG_BASE_FLOOR))
+                        if ((_map.tile[tileT+_map.w].b == RMG_BASE_FLOOR)
+                         && (_map.tile[tileT-_map.w].b == RMG_BASE_FLOOR))
                         {
-                            _map.tile[tileT].d = RMG_BASE_FLOOR;
+                            _map.tile[tileT].b = RMG_BASE_FLOOR;
                             _map.tile[tileT].r = _map.tile[tileT+_map.w].r;
                         }
                         // Remove diagonal right wall tiles
@@ -225,30 +225,30 @@ namespace rmg
                         // ?X?
                         // X?O
                         //--------------------
-                        if ((_map.tile[tileT+_map.w+1].d == RMG_BASE_WALL)
-                         && (_map.tile[tileT+_map.w-1].d == RMG_BASE_FLOOR)
-                         && (_map.tile[tileT-_map.w+1].d == RMG_BASE_FLOOR)
-                         && (_map.tile[tileT-_map.w-1].d == RMG_BASE_WALL))
+                        if ((_map.tile[tileT+_map.w+1].b == RMG_BASE_WALL)
+                         && (_map.tile[tileT+_map.w-1].b == RMG_BASE_FLOOR)
+                         && (_map.tile[tileT-_map.w+1].b == RMG_BASE_FLOOR)
+                         && (_map.tile[tileT-_map.w-1].b == RMG_BASE_WALL))
                         {
-                            _map.tile[tileT+_map.w].d = RMG_BASE_FLOOR;
-                            _map.tile[tileT-_map.w].d = RMG_BASE_FLOOR;
-                            _map.tile[tileT+1].d = RMG_BASE_FLOOR;
-                            _map.tile[tileT-1].d = RMG_BASE_FLOOR;
+                            _map.tile[tileT+_map.w].b = RMG_BASE_FLOOR;
+                            _map.tile[tileT-_map.w].b = RMG_BASE_FLOOR;
+                            _map.tile[tileT+1].b = RMG_BASE_FLOOR;
+                            _map.tile[tileT-1].b = RMG_BASE_FLOOR;
                         }
                         // Remove diagonal left wall tiles
                         // X?O
                         // ?X?
                         // O?X
                         //--------------------
-                        if ((_map.tile[tileT+_map.w+1].d == RMG_BASE_FLOOR)
-                         && (_map.tile[tileT+_map.w-1].d == RMG_BASE_WALL)
-                         && (_map.tile[tileT-_map.w+1].d == RMG_BASE_WALL)
-                         && (_map.tile[tileT-_map.w-1].d == RMG_BASE_FLOOR))
+                        if ((_map.tile[tileT+_map.w+1].b == RMG_BASE_FLOOR)
+                         && (_map.tile[tileT+_map.w-1].b == RMG_BASE_WALL)
+                         && (_map.tile[tileT-_map.w+1].b == RMG_BASE_WALL)
+                         && (_map.tile[tileT-_map.w-1].b == RMG_BASE_FLOOR))
                         {
-                            _map.tile[tileT+_map.w].d = RMG_BASE_FLOOR;
-                            _map.tile[tileT-_map.w].d = RMG_BASE_FLOOR;
-                            _map.tile[tileT+1].d = RMG_BASE_FLOOR;
-                            _map.tile[tileT-1].d = RMG_BASE_FLOOR;
+                            _map.tile[tileT+_map.w].b = RMG_BASE_FLOOR;
+                            _map.tile[tileT-_map.w].b = RMG_BASE_FLOOR;
+                            _map.tile[tileT+1].b = RMG_BASE_FLOOR;
+                            _map.tile[tileT-1].b = RMG_BASE_FLOOR;
                         }
                     }
                 }

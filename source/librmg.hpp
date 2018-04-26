@@ -27,9 +27,16 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #include <ctime>
 #include <random>
 #include <dirent.h>
+
+//---- Layers ----//
+#define RMG_LAYER_NONE   0
+#define RMG_LAYER_BASE   1
+#define RMG_LAYER_OBJECT 2
+#define RMG_LAYER_EVENT  3
 
 //---- Layer - Base ----//
 #define RMG_BASE_WALL   0
@@ -52,11 +59,26 @@
 //---- Layer - Event ----//
 #define RMG_EVENT_NONE         0
 #define RMG_EVENT_TRIGGER      1
-#define RMG_EVENT_TRIGGERABLE  2
+#define RMG_EVENT_TARGET       2
 #define RMG_EVENT_PLAYER_GOAL  3
 #define RMG_EVENT_SPAWN_NPC    4
-#define RMG_EVENT_SPAWN_BOSS   5
-#define RMG_EVENT_SPAWN_PLAYER 6
+#define RMG_EVENT_SPAWN_MOB    5
+#define RMG_EVENT_SPAWN_BOSS   6
+#define RMG_EVENT_SPAWN_PLAYER 7
+#define RMG_EVENT_DOOR_LOCK    8
+#define RMG_EVENT_DOOR_UNLOCK  9
+#define RMG_EVENT_DOOR_OPEN    10
+#define RMG_EVENT_DOOR_CLOSE   11
+#define RMG_EVENT_DOOR_TOGGLE  12
+#define RMG_EVENT_SWITCH       13
+#define RMG_EVENT_WARP         14
+
+//---- Event - State ----//
+#define RMG_EVENT_STATE_NONE      0
+#define RMG_EVENT_STATE_READY     1
+#define RMG_EVENT_STATE_TRIGGERED 2
+#define RMG_EVENT_STATE_TRUE      3
+#define RMG_EVENT_STATE_FALSE     4
 
 #define RMG_PATH_SL 0 // Straight Line
 #define RMG_PATH_ND 1 // Ninety Degree angle lines
@@ -82,10 +104,11 @@
 #define RMG_GEN_T1 5 // Town 1
 
 #define RMG_ROOM_EMPTY      0
-#define RMG_ROOM_BRIDGE     1
-#define RMG_ROOM_WELL       2
-#define RMG_ROOM_BLACKSMITH 3
-#define RMG_ROOM_STORE      4
+#define RMG_ROOM_SECRET     1
+#define RMG_ROOM_BRIDGE     2
+#define RMG_ROOM_WELL       3
+#define RMG_ROOM_BLACKSMITH 4
+#define RMG_ROOM_STORE      5
 
 #define RMG_AS_NONE   0
 #define RMG_AS_START  1
@@ -100,24 +123,43 @@
 namespace rmg
 {
 
+    struct sEventTile
+    {
+        uint16_t ID = 0;
+        sEventTile *next = nullptr;
+        bool enabled = false;
+        bool reTriggerable = true;
+        uint16_t *triggerTileID = nullptr;
+        uint16_t triggerTileCount = 0;
+        uint16_t *targetTileID = nullptr;
+        uint16_t targetTileCount = 0;
+        uint16_t type = RMG_EVENT_NONE;
+        uint16_t state = RMG_EVENT_STATE_NONE;
+        uint32_t timer = 3000; //ms
+    };
+
     struct sPrefabTile
     {
         uint16_t b = RMG_BASE_FLOOR;
         uint16_t o = RMG_OBJECT_NONE;
-        uint16_t e = RMG_EVENT_NONE;
+        uint16_t e = RMG_EVENT_NONE; // Event ID
     };
 
     struct sPrefab
     {
-        uint32_t count = 0;
+        sPrefab *next = nullptr;
+        std::string filename = "";
+        uint16_t w = 0;
+        uint16_t h = 0;
+        uint16_t size = 0;
+        uint32_t tileCount = 0;
         sPrefabTile *tile = nullptr;
     };
 
     struct sPrefabData
     {
         uint32_t count = 0;
-        std::string *filename = nullptr;
-        sPrefab *prefab = nullptr;
+        sPrefab *head = nullptr;
     };
 
     struct sPath
@@ -133,14 +175,14 @@ namespace rmg
 
     struct sTile
     {
-        bool     c = false; // completed flag
-        uint16_t d = RMG_BASE_FLOOR;
+        uint16_t b = RMG_BASE_FLOOR;
         uint16_t o = RMG_OBJECT_NONE;
         uint16_t e = RMG_EVENT_NONE;
         uint16_t r = 0; // room number
         uint32_t x = 0;
         uint32_t y = 0;
 
+        bool     c = false; // completed flag
         uint32_t H = 0; // Heuristic cost
         uint32_t G = 0; // Movement cost
         uint32_t F = 0; // Total cost
@@ -171,9 +213,10 @@ namespace rmg
 
     struct sMap
     {
-        std::string prefabPath = "data/prefabs";
         sTile *tile = nullptr;
         sRoom *room = nullptr;
+        sEventTile *event = nullptr;
+        uint16_t eventCount = 0;
         uint32_t w = 100;
         uint32_t h = 100;
         uint32_t tileCount = w * h; // w * h
@@ -184,7 +227,7 @@ namespace rmg
         uint16_t roomMax = density * pass; // Will try generate up to roomMax rooms, on a tiny map reaching this is impossible
         uint16_t roomCount = 0;
         uint16_t roomRadiusMax = 9; // max room radius
-        uint16_t roomRadiusMin = 7; // min room radius
+        uint16_t roomRadiusMin = 5; // min room radius
         uint16_t roomBorder = 4;
         uint16_t roomShape = RMG_SQUARE;
         uint16_t floorAreaMin = 60; // percentage, min % floor area
@@ -194,6 +237,9 @@ namespace rmg
         uint16_t connectivityPadding = 0; // Tiles to pad on each side of generated paths, roomBorder should be taken into consideration!
         uint16_t directionBias = RMG_NONE; // Favored direction
         uint16_t directionBiasStrength = 2; // Favored direction strength
+        bool enablePrefabs = true;
+        std::string prefabPath = "data/prefabs";
+        sPrefabData prefab;
     };
 
     // --- librmg.cpp ---
@@ -250,7 +296,9 @@ namespace rmg
     bool pathAS(sMap &_map, sPath &_path);
 
     // --- librmg_prefab.cpp ---
-    bool prefabFind(sMap &_map, sPrefabData &_prefabData);
+    void prefabFreeAll(sMap &_map);
+    bool prefabFind(sMap &_map);
+    void prefabLoad(sMap &_map, const std::string &_fileName);
 
 } // namespace rmg
 
