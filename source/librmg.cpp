@@ -39,6 +39,8 @@ namespace rmg
 
     void mapFree(sMap &_map)
     {
+        prefabFreeAll(_map);
+        prefabEventFreeAll(_map);
         if (_map.tile != nullptr)
         {
             delete [] _map.tile;

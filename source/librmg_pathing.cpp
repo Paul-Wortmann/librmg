@@ -30,7 +30,7 @@ namespace rmg
     {
         if (_path.path != nullptr)
         {
-            delete _path.path;
+            delete[] _path.path;
             _path.path = nullptr;
         }
     }

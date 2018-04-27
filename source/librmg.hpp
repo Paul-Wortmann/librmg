@@ -156,12 +156,6 @@ namespace rmg
         sPrefabTile *tile = nullptr;
     };
 
-    struct sPrefabData
-    {
-        uint32_t count = 0;
-        sPrefab *head = nullptr;
-    };
-
     struct sPath
     {
         uint32_t *path = nullptr; // array of path tile numbers
@@ -239,7 +233,8 @@ namespace rmg
         uint16_t directionBiasStrength = 2; // Favored direction strength
         bool enablePrefabs = true;
         std::string prefabPath = "data/prefabs";
-        sPrefabData prefab;
+        uint16_t prefabCount = 0;
+        sPrefab *prefab = nullptr;
     };
 
     // --- librmg.cpp ---
@@ -297,8 +292,10 @@ namespace rmg
 
     // --- librmg_prefab.cpp ---
     void prefabFreeAll(sMap &_map);
+    void prefabEventFreeAll(sMap &_map);
     bool prefabFind(sMap &_map);
     void prefabLoad(sMap &_map, const std::string &_fileName);
+    void mapPrefabRooms(sMap &_map);
 
 } // namespace rmg
 

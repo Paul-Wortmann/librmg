@@ -76,9 +76,10 @@ namespace rmg
                 // down / south
                 for (uint16_t j = _map.room[i].y; j < _map.h; j++)
                 {
+                    uint16_t r = _map.tile[(j * _map.w) + k].r;
                     if ((_map.tile[(j * _map.w) + k].b == RMG_BASE_FLOOR) && (_map.tile[(j * _map.w) + k].r != i))
                     {
-                        distanceT = sqrt(((_map.room[j].x - _map.room[i].x) * (_map.room[j].x - _map.room[i].x)) + ((_map.room[j].y - _map.room[i].y) * (_map.room[j].y - _map.room[i].y)));
+                        distanceT = sqrt(((_map.room[r].x - _map.room[i].x) * (_map.room[r].x - _map.room[i].x)) + ((_map.room[r].y - _map.room[i].y) * (_map.room[r].y - _map.room[i].y)));
                         if (distanceT < distanceS)
                         {
                             distanceS = distanceT;
@@ -90,9 +91,10 @@ namespace rmg
                 // up / north
                 for (uint16_t j = _map.room[i].y; j > 0; j--)
                 {
+                    uint16_t r = _map.tile[(j * _map.w) + k].r;
                     if ((_map.tile[(j * _map.w) + k].b == RMG_BASE_FLOOR) && (_map.tile[(j * _map.w) + k].r != i))
                     {
-                        distanceT = sqrt(((_map.room[j].x - _map.room[i].x) * (_map.room[j].x - _map.room[i].x)) + ((_map.room[j].y - _map.room[i].y) * (_map.room[j].y - _map.room[i].y)));
+                        distanceT = sqrt(((_map.room[r].x - _map.room[i].x) * (_map.room[r].x - _map.room[i].x)) + ((_map.room[r].y - _map.room[i].y) * (_map.room[r].y - _map.room[i].y)));
                         if (distanceT < distanceN)
                         {
                             distanceN = distanceT;
@@ -135,7 +137,7 @@ namespace rmg
             }
         }
         // try to connect lonely rooms
-        for (uint16_t i = _map.roomCount; i > 0; i--)
+        for (uint16_t i = (_map.roomCount-1); i > 0; i--)
         {
             int32_t deltaX = 0;
             int32_t deltaY = 0;
@@ -261,8 +263,8 @@ namespace rmg
                         mapConnectRooms_DW(_map, i, i+1);
                     if (_map.connectivityAlgorithm == RMG_PATH_CC)
                         mapConnectRooms_CC(_map, i, i+1);
-                    pathASFree(pathT);
                 }
+                pathASFree(pathT);
             }
         }
     }

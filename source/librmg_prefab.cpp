@@ -108,11 +108,35 @@ namespace rmg
 
     void prefabFreeAll(sMap &_map)
     {
+        sPrefab *prefabTemp = _map.prefab;
+        while (prefabTemp != nullptr)
+        {
+            sPrefab *prefabTempPrevious = prefabTemp;
+            prefabTemp = prefabTemp->next;
+            if (prefabTempPrevious->tile)
+                delete[] prefabTempPrevious->tile;
+            delete prefabTempPrevious;
+        }
+    }
+
+    void prefabEventFreeAll(sMap &_map)
+    {
+        sEventTile *eventTemp = _map.event;
+        while (eventTemp != nullptr)
+        {
+            sEventTile *eventTempPrevious = eventTemp;
+            eventTemp = eventTemp->next;
+            if (eventTempPrevious->triggerTileID)
+                delete[] eventTempPrevious->triggerTileID;
+            if (eventTempPrevious->targetTileID)
+                delete[] eventTempPrevious->targetTileID;
+            delete eventTempPrevious;
+        }
     }
 
     bool prefabFind(sMap &_map)
     {
-        _map.prefab.count = 0;
+        _map.prefabCount = 0;
         DIR *dir;
         struct dirent *ent;
         if ((dir = opendir (_map.prefabPath.c_str())) != nullptr)
@@ -121,7 +145,7 @@ namespace rmg
             {
                 if (ent->d_type == DT_REG)
                 {
-                    _map.prefab.count++;
+                    _map.prefabCount++;
                     prefabLoad(_map, ent->d_name);
                 }
             }
@@ -132,7 +156,7 @@ namespace rmg
             std::cout << "Error could not open directory." << std::endl;
             return EXIT_FAILURE;
         }
-        return (_map.prefab.count > 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+        return (_map.prefabCount > 0) ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
     void prefabLoad(sMap &_map, const std::string &_fileName)
@@ -145,15 +169,15 @@ namespace rmg
         if (tFstream.is_open())
         {
             uint16_t eventCount = _map.eventCount;
-            sPrefab *prefabTemp = _map.prefab.head;
-            if (_map.prefab.head == nullptr)
+            sPrefab *prefabTemp = _map.prefab;
+            if (_map.prefab == nullptr)
             {
-                _map.prefab.head = new sPrefab;
-                prefabTemp = _map.prefab.head;
+                _map.prefab = new sPrefab;
+                prefabTemp = _map.prefab;
             }
             else
             {
-                for (prefabTemp = _map.prefab.head; prefabTemp->next != nullptr; prefabTemp = prefabTemp->next);
+                for (prefabTemp = _map.prefab; prefabTemp->next != nullptr; prefabTemp = prefabTemp->next);
                 prefabTemp->next = new sPrefab;
                 prefabTemp = prefabTemp->next;
             }
@@ -177,14 +201,6 @@ namespace rmg
                         prefabTemp->w = xmlGetSingleInt(tData);
                     if (tData.find("<height>") != std::string::npos)
                         prefabTemp->h = xmlGetSingleInt(tData);
-                    if (tData.find("<layer_base>") != std::string::npos)
-                    {
-                        prefabTemp->tileCount = prefabTemp->w * prefabTemp->h;
-                        if (prefabTemp->tile == nullptr)
-                            prefabTemp->tile = new sPrefabTile[prefabTemp->tileCount];
-                        tLine = 0;
-                        currentLayer = RMG_LAYER_BASE;
-                    }
                     if (tData.find("<layer_object>") != std::string::npos)
                     {
                         prefabTemp->tileCount = prefabTemp->w * prefabTemp->h;
@@ -271,6 +287,36 @@ namespace rmg
         else
         {
             std::cout << "Error - Failed to open file: " << fileAndPath << std::endl;
+        }
+    }
+
+// should find how many prefabs of the same size and randomly select one.... TODO
+    void mapPrefabRooms(sMap &_map)
+    {
+        for (uint16_t i = 0; i < _map.roomCount; i++)
+        {
+            sPrefab * tempPrefab = _map.prefab;
+            for (tempPrefab = _map.prefab; tempPrefab != nullptr; )
+            {
+                if ((_map.room[i].w == tempPrefab->w) && (_map.room[i].h == tempPrefab->h))
+                {
+                    std::cout << "Applying prefab: " << tempPrefab->filename << std::endl;
+                    uint16_t sX = _map.room[i].x - (_map.room[i].w / 2);
+                    uint16_t sY = _map.room[i].y - (_map.room[i].h / 2);
+                    for (uint16_t k = 0; k < tempPrefab->h; k++)
+                    {
+                        for (uint16_t l = 0; l < tempPrefab->w; l++)
+                        {
+                            _map.tile[(_map.w * (k+sY)) + (l+sX)].b = tempPrefab->tile[(tempPrefab->w * k) + l].b;
+                            _map.tile[(_map.w * (k+sY)) + (l+sX)].o = tempPrefab->tile[(tempPrefab->w * k) + l].o;
+                            _map.tile[(_map.w * (k+sY)) + (l+sX)].e = tempPrefab->tile[(tempPrefab->w * k) + l].e;
+                        }
+                    }
+                    tempPrefab = nullptr;
+                }
+                if (tempPrefab != nullptr)
+                    tempPrefab = tempPrefab->next;
+            }
         }
     }
 
