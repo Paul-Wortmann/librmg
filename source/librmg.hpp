@@ -220,9 +220,9 @@ namespace rmg
         uint16_t roomMin = 3; // Guaranteed minimum number of rooms, maps with less are discarded (sMap.pass times)
         uint16_t roomMax = density * pass; // Will try generate up to roomMax rooms, on a tiny map reaching this is impossible
         uint16_t roomCount = 0;
-        uint16_t roomRadiusMax = 9; // max room radius
-        uint16_t roomRadiusMin = 5; // min room radius
-        uint16_t roomBorder = 4;
+        uint16_t roomRadiusMax = 8; // max room radius
+        uint16_t roomRadiusMin = 2; // min room radius
+        uint16_t roomBorder = 3;
         uint16_t roomShape = RMG_SQUARE;
         uint16_t floorAreaMin = 60; // percentage, min % floor area
         uint16_t generationAlgorithm = RMG_GEN_D1;
@@ -296,6 +296,9 @@ namespace rmg
     bool prefabFind(sMap &_map);
     void prefabLoad(sMap &_map, const std::string &_fileName);
     void mapPrefabRooms(sMap &_map);
+    void mapPrefabRoomRotateFV(sPrefab &_prefab); // Flip Vertically
+    void mapPrefabRoomRotateR90(sPrefab &_prefab); // Rotate right 90 degrees
+    void mapPrefabRoomRotateL90(sPrefab &_prefab); // Rotate left 90 degrees
 
 } // namespace rmg
 

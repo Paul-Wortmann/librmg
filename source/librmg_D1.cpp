@@ -36,10 +36,15 @@ namespace rmg
         for (uint32_t i = 0; i < roomMax; i++)
         {
             uint32_t r = (rand() % (_map.roomRadiusMax - _map.roomRadiusMin)) + _map.roomRadiusMin;
-
+            if ((r % 2) != 0)
+                r++;
+            if (r < _map.roomRadiusMin)
+                r = _map.roomRadiusMin;
+            if (r > _map.roomRadiusMax)
+                r = _map.roomRadiusMax;
             int32_t x = (rand() % (_map.w - r - r)) + r;
             int32_t y = (rand() % (_map.h - r - r)) + r;
-            if ((x > 1) && (x < _map.w-1) && (y > 1) && (y < _map.h-1))
+            if ((x > r) && (x < _map.w-r) && (y > r) && (y < _map.h-r))
             {
                 if (_map.roomShape == RMG_RANDOM)
                 {
@@ -85,8 +90,8 @@ namespace rmg
                 }
             }
             mapInitRooms(_map);
-            mapPrefabRooms(_map);
             mapConnectRooms(_map);
+            mapPrefabRooms(_map);
             //mapRemoveAnomalies(_map);
         }
     }

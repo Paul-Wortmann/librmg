@@ -60,9 +60,9 @@ namespace rmg
     {
         if (_map.tile == nullptr)
             return false;
-        int32_t rxMin = _x - _r;
+        int32_t rxMin = _x - _r - 1;
         int32_t rxMax = _x + _r;
-        int32_t ryMin = _y - _r;
+        int32_t ryMin = _y - _r - 1;
         int32_t ryMax = _y + _r;
         if (rxMin < 1)
             return false;
@@ -87,9 +87,9 @@ namespace rmg
     {
         if (_map.tile == nullptr)
             return;
-        uint32_t rxMin = _x - _r;
+        uint32_t rxMin = _x - _r - 1;
         uint32_t rxMax = _x + _r;
-        uint32_t ryMin = _y - _r;
+        uint32_t ryMin = _y - _r - 1;
         uint32_t ryMax = _y + _r;
         for (uint32_t i = ryMin; i < ryMax; i++)
         {
@@ -202,14 +202,20 @@ namespace rmg
                         }
                     }
                 }
-                _map.room[i].w = _map.room[i].posXMax - _map.room[i].posXMin;
-                _map.room[i].h = _map.room[i].posYMax - _map.room[i].posYMin;
-                _map.room[i].x = (_map.room[i].w / 2) + _map.room[i].posXMin;
-                _map.room[i].y = (_map.room[i].h / 2) + _map.room[i].posYMin;
+                _map.room[i].w = _map.room[i].posXMax - _map.room[i].posXMin + 1;
+                _map.room[i].h = _map.room[i].posYMax - _map.room[i].posYMin + 1;
+                //if ((_map.room[i].w % 2) == 0)
+                    _map.room[i].x = (_map.room[i].w / 2) + _map.room[i].posXMin;
+                //else
+                    //_map.room[i].x = ((_map.room[i].w - 1) / 2) + _map.room[i].posXMin + 1;
+
+                //if ((_map.room[i].h % 2) == 0)
+                    _map.room[i].y = (_map.room[i].h / 2) + _map.room[i].posYMin;
+                //else
+                    //_map.room[i].y = ((_map.room[i].h - 1) / 2) + _map.room[i].posYMin + 1;
             }
         }
     }
-
 
     uint32_t mapGetRoomArea(sMap &_map, const uint16_t &_r)
     {

@@ -40,7 +40,7 @@ namespace rmg
                             std::cout << "#";
                         break;
                         case RMG_BASE_LIQUID:
-                            std::cout << "-";
+                            std::cout << "O";
                         break;
                         case RMG_BASE_FLOOR:
                             switch (_map.tile[(i * _map.w) + j].o)

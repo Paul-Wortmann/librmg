@@ -201,6 +201,14 @@ namespace rmg
                         prefabTemp->w = xmlGetSingleInt(tData);
                     if (tData.find("<height>") != std::string::npos)
                         prefabTemp->h = xmlGetSingleInt(tData);
+                    if (tData.find("<layer_base>") != std::string::npos)
+                    {
+                        prefabTemp->tileCount = prefabTemp->w * prefabTemp->h;
+                        if (prefabTemp->tile == nullptr)
+                            prefabTemp->tile = new sPrefabTile[prefabTemp->tileCount];
+                        tLine = 0;
+                        currentLayer = RMG_LAYER_BASE;
+                    }
                     if (tData.find("<layer_object>") != std::string::npos)
                     {
                         prefabTemp->tileCount = prefabTemp->w * prefabTemp->h;
@@ -301,6 +309,7 @@ namespace rmg
                 if ((_map.room[i].w == tempPrefab->w) && (_map.room[i].h == tempPrefab->h))
                 {
                     std::cout << "Applying prefab: " << tempPrefab->filename << std::endl;
+                    mapPrefabRoomRotateL90(*tempPrefab);
                     uint16_t sX = _map.room[i].x - (_map.room[i].w / 2);
                     uint16_t sY = _map.room[i].y - (_map.room[i].h / 2);
                     for (uint16_t k = 0; k < tempPrefab->h; k++)
@@ -318,6 +327,66 @@ namespace rmg
                     tempPrefab = tempPrefab->next;
             }
         }
+    }
+
+    void mapPrefabRoomRotateFV(sPrefab &_prefab)
+    {
+        sPrefabTile *tile = new sPrefabTile[_prefab.tileCount];
+        for (uint32_t i = 0; i < _prefab.tileCount; i++)
+        {
+            tile[i].b = _prefab.tile[i].b;
+            tile[i].o = _prefab.tile[i].o;
+            tile[i].e = _prefab.tile[i].e;
+        }
+        for (uint32_t i = 0; i < _prefab.tileCount; i++)
+        {
+            _prefab.tile[(_prefab.tileCount-1)-i].b = tile[i].b;
+            _prefab.tile[(_prefab.tileCount-1)-i].o = tile[i].o;
+            _prefab.tile[(_prefab.tileCount-1)-i].e = tile[i].e;
+        }
+        delete[] tile;
+    }
+
+    void mapPrefabRoomRotateR90(sPrefab &_prefab)
+    {
+        sPrefabTile *tile = new sPrefabTile[_prefab.tileCount];
+        for (uint32_t i = 0; i < _prefab.tileCount; i++)
+        {
+            tile[i].b = _prefab.tile[i].b;
+            tile[i].o = _prefab.tile[i].o;
+            tile[i].e = _prefab.tile[i].e;
+        }
+        for (uint32_t i = 0; i < _prefab.h; i++)
+        {
+            for (uint32_t j = 0; j < _prefab.w; j++)
+            {
+                _prefab.tile[(i * _prefab.w) + j].b = tile[(j * _prefab.w) + ((_prefab.w-1)-i)].b;
+                _prefab.tile[(i * _prefab.w) + j].o = tile[(j * _prefab.w) + ((_prefab.w-1)-i)].o;
+                _prefab.tile[(i * _prefab.w) + j].e = tile[(j * _prefab.w) + ((_prefab.w-1)-i)].e;
+            }
+        }
+        delete[] tile;
+    }
+
+    void mapPrefabRoomRotateL90(sPrefab &_prefab)
+    {
+        sPrefabTile *tile = new sPrefabTile[_prefab.tileCount];
+        for (uint32_t i = 0; i < _prefab.tileCount; i++)
+        {
+            tile[i].b = _prefab.tile[i].b;
+            tile[i].o = _prefab.tile[i].o;
+            tile[i].e = _prefab.tile[i].e;
+        }
+        for (uint32_t i = 0; i < _prefab.h; i++)
+        {
+            for (uint32_t j = 0; j < _prefab.w; j++)
+            {
+                _prefab.tile[(i * _prefab.w) + j].b = tile[(i * _prefab.w) + ((_prefab.w-1)-j)].b;
+                _prefab.tile[(i * _prefab.w) + j].o = tile[(i * _prefab.w) + ((_prefab.w-1)-j)].o;
+                _prefab.tile[(i * _prefab.w) + j].e = tile[(i * _prefab.w) + ((_prefab.w-1)-j)].e;
+            }
+        }
+        delete[] tile;
     }
 
 } // namespace rmg
