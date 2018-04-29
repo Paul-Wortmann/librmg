@@ -296,9 +296,11 @@ namespace rmg
     bool prefabFind(sMap &_map);
     void prefabLoad(sMap &_map, const std::string &_fileName);
     void mapPrefabRooms(sMap &_map);
-    void mapPrefabRoomRotateFV(sPrefab &_prefab); // Flip Vertically
+    void mapPrefabRoomFlipV(sPrefab &_prefab); // Flip Vertically
+    void mapPrefabRoomFlipH(sPrefab &_prefab); // Flip Horizontally
     void mapPrefabRoomRotateR90(sPrefab &_prefab); // Rotate right 90 degrees
     void mapPrefabRoomRotateL90(sPrefab &_prefab); // Rotate left 90 degrees
+    void mapPrefabRoomRotate180(sPrefab &_prefab); // Rotate 180 degrees
 
 } // namespace rmg
 
