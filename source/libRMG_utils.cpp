@@ -37,22 +37,24 @@ void _libRMG_utils_map_initialize(sLibRMGMapData &_data)
         _data.seed = time(0);
     }
     srand(_data.seed);
+    
+    // if prefabs need loading, load them
+    if (_data.enablePrefabs)
+    {
+        _libRMG_prefab_find(_data);
+    }
 }
 
 void _libRMG_utils_map_free(sLibRMGMapData &_data)
 {
+    _libRMG_prefab_freeAll(_data);
+    _libRMG_prefab_eventFreeAll(_data);
+    
     // object
     if (_data.object != nullptr)
     {
         delete[] _data.object;
         _data.object = nullptr;
-    }
-
-    // event
-    if (_data.event != nullptr)
-    {
-        delete[] _data.event;
-        _data.event = nullptr;
     }
 
     // room
@@ -69,12 +71,6 @@ void _libRMG_utils_map_free(sLibRMGMapData &_data)
         _data.tile = nullptr;
     }
 
-    // prefab
-    if (_data.prefab != nullptr)
-    {
-        delete[] _data.prefab;
-        _data.prefab = nullptr;
-    }
 }
 
 void _libRMG_utils_map_perimeter_walls(sLibRMGMapData &_data)

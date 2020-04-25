@@ -106,34 +106,51 @@ static int32_t _libRMG_prefab_xmlGetIntValue(const std::string &_string, const u
 
 void _libRMG_prefab_freeAll(sLibRMGMapData &_data)
 {
-    sLibRMGPrefab *prefabTemp = _data.prefab;
-    while (prefabTemp != nullptr)
+    while (_data.prefab != nullptr)
     {
-        sLibRMGPrefab *prefabTempPrevious = prefabTemp;
-        prefabTemp = prefabTemp->next;
-        if (prefabTempPrevious->tile)
+        sLibRMGPrefab *prefabTempPrevious = _data.prefab;
+        _data.prefab = _data.prefab->next;
+        if (prefabTempPrevious->tile != nullptr)
+        {
             delete[] prefabTempPrevious->tile;
-        delete prefabTempPrevious;
+            prefabTempPrevious->tile = nullptr;
+        }
+        if (prefabTempPrevious != nullptr)
+        {
+            delete prefabTempPrevious;
+            prefabTempPrevious = nullptr;
+        }
     }
 }
 
 void _libRMG_prefab_eventFreeAll(sLibRMGMapData &_data)
 {
-    sLibRMGMapEvent *eventTemp = _data.event;
-    while (eventTemp != nullptr)
+    while (_data.event != nullptr)
     {
-        sLibRMGMapEvent *eventTempPrevious = eventTemp;
-        eventTemp = eventTemp->next;
-        if (eventTempPrevious->triggerTileID)
+        sLibRMGMapEvent *eventTempPrevious = _data.event;
+        _data.event = _data.event->next;
+        if (eventTempPrevious->triggerTileID != nullptr)
+        {
             delete[] eventTempPrevious->triggerTileID;
-        if (eventTempPrevious->targetTileID)
+            eventTempPrevious->triggerTileID = nullptr;
+        }
+        if (eventTempPrevious->targetTileID != nullptr)
+        {
             delete[] eventTempPrevious->targetTileID;
-        delete eventTempPrevious;
+            eventTempPrevious->targetTileID = nullptr;
+        }
+        if (eventTempPrevious != nullptr)
+        {
+            delete eventTempPrevious;
+            eventTempPrevious = nullptr;
+        }
     }
 }
 
 bool _libRMG_prefab_find(sLibRMGMapData &_data)
 {
+    _libRMG_prefab_freeAll(_data);
+    _libRMG_prefab_eventFreeAll(_data);
     _data.prefabCount = 0;
     DIR *dir;
     struct dirent *ent;
@@ -160,6 +177,22 @@ bool _libRMG_prefab_find(sLibRMGMapData &_data)
 
 void _libRMG_prefab_load(sLibRMGMapData &_data, const std::string &_fileName)
 {
+    // first make sure the prefab has not yeat already been loaded!
+    if (_data.prefab != nullptr)
+    {
+        sLibRMGPrefab *prefabTemp = _data.prefab;
+        for (prefabTemp = _data.prefab; prefabTemp->next != nullptr; prefabTemp = prefabTemp->next)
+        {
+            if (prefabTemp != nullptr)
+            {
+                if (prefabTemp->filename.compare(_fileName) == 0)
+                {
+                    return;
+                }
+            }
+        }
+    }
+
     // read file and parse
     std::string fileAndPath = _data.prefabPath;
     fileAndPath += "/";
@@ -289,7 +322,7 @@ void _libRMG_prefab_load(sLibRMGMapData &_data, const std::string &_fileName)
             }
         }
         tFstream.close();
-        std::cout << "Loaded prefab: " << fileAndPath << std::endl;
+        //std::cout << "Loaded prefab: " << fileAndPath << std::endl;
     }
     else
     {

@@ -26,6 +26,7 @@
 
 #include "libRMG_defines.hpp"
 #include "libRMG_includes.hpp"
+#include "libRMG_prefab.hpp"
 
 void _libRMG_utils_map_initialize(sLibRMGMapData &_data);
 void _libRMG_utils_map_free(sLibRMGMapData &_data);
